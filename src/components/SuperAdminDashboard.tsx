@@ -110,6 +110,9 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
   const [editingOrganiser, setEditingOrganiser] = useState(null);
   const [isOrganiserDialogOpen, setIsOrganiserDialogOpen] = useState(false);
   const [inboxFilters, setInboxFilters] = useState({});
+  const [currentMonth, setCurrentMonth] = useState(0); // 0 = January 2025
+  const [selectedDateEvents, setSelectedDateEvents] = useState(null);
+  const [isEventSelectDialogOpen, setIsEventSelectDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     supportEmail: "",
@@ -227,9 +230,123 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
     setInboxFilters({});
   };
 
-  const handleEventClick = (event) => {
-    // Navigate to EventAdminDashboard for the selected event
-    onNavigate("event-admin-dashboard", { event });
+  const handleEventClick = (event: any, organiser: any = null) => {
+    // Navigate to EventAdminDashboard for the selected event with organiser info
+    // If organiser not provided, try to map event to organiser
+    let eventOrganiser = organiser;
+    if (!eventOrganiser) {
+      // Map events to their organisers
+      const eventOrganiserMap: any = {
+        1: organisers[1], // Tech Conference -> EventPro Management
+        2: organisers[0], // Innovation Summit -> Event Management Co
+        3: organisers[2]  // Digital Expo -> MegaEvents Co
+      };
+      eventOrganiser = eventOrganiserMap[event.id];
+    }
+    window.scrollTo({ top: 0, behavior: "instant" });
+    onNavigate("event-admin-dashboard", { event, organiser: eventOrganiser });
+  };
+
+  const handleCalendarDateClick = (events) => {
+    if (events.length === 1) {
+      handleEventClick(events[0]);
+    } else if (events.length > 1) {
+      setSelectedDateEvents(events);
+      setIsEventSelectDialogOpen(true);
+    }
+  };
+
+  const getMonthName = (monthIndex) => {
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    return months[monthIndex];
+  };
+
+  const navigateMonth = (direction) => {
+    setCurrentMonth(prev => {
+      const newMonth = prev + direction;
+      // Allow navigation between January (0) and December (11)
+      if (newMonth < 0) return 11;
+      if (newMonth > 11) return 0;
+      return newMonth;
+    });
+  };
+
+  // Mock events data with dates for calendar
+  const calendarEvents = [
+    {
+      id: 1,
+      name: "Tech Conference 2025",
+      date: "January 22-24, 2025",
+      location: "Las Vegas Convention Center",
+      exhibitorCount: 45,
+      visitorCount: 1200,
+      startDate: new Date(2025, 0, 22), // Jan 22
+      endDate: new Date(2025, 0, 24),
+      color: "blue"
+    },
+    {
+      id: 2,
+      name: "Innovation Summit",
+      date: "January 24-26, 2025",
+      location: "Chicago Convention Center",
+      exhibitorCount: 32,
+      visitorCount: 850,
+      startDate: new Date(2025, 0, 24), // Jan 24
+      endDate: new Date(2025, 0, 26),
+      color: "green"
+    },
+    {
+      id: 3,
+      name: "Digital Expo",
+      date: "January 26-28, 2025",
+      location: "San Francisco Expo Center",
+      exhibitorCount: 28,
+      visitorCount: 620,
+      startDate: new Date(2025, 0, 26), // Jan 26
+      endDate: new Date(2025, 0, 28),
+      color: "purple"
+    }
+  ];
+
+  // Get events for a specific date
+  const getEventsForDate = (year, month, day) => {
+    const checkDate = new Date(year, month, day);
+    // Set to start of day for proper comparison
+    checkDate.setHours(0, 0, 0, 0);
+    
+    return calendarEvents.filter(event => {
+      const start = new Date(event.startDate);
+      const end = new Date(event.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+      
+      return checkDate >= start && checkDate <= end;
+    });
+  };
+
+  // Generate calendar days for current month
+  const generateCalendarDays = () => {
+    const year = 2025;
+    const month = currentMonth;
+    let firstDay = new Date(year, month, 1).getDay();
+    // Convert Sunday (0) to 6, and shift Monday (1) to 0
+    firstDay = firstDay === 0 ? 6 : firstDay - 1;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const days = [];
+    
+    // Empty cells before month starts
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+    
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const events = getEventsForDate(year, month, day);
+      days.push({ day, events });
+    }
+    
+    return days;
   };
 
   return (
@@ -314,79 +431,222 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
               </div>
             </div>
 
-            {/* Event Organiser Management Section (moved up) */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Event Organiser Management</CardTitle>
-                <CardDescription>Manage event organisers and quick access to their events</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">Event Organisers</h3>
-                    <Button size="sm" onClick={handleAddOrganiser}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Event Organiser
+            {/* Event Organiser Management and Calendar Side by Side */}
+            <div className="grid gap-6 md:grid-cols-3">
+              {/* Left Column - Event Organiser Management Section (2/3 width) */}
+              <Card className="md:col-span-2">
+                <CardContent>
+                  <div>
+                    <div className="flex items-center justify-between mt-6 mb-4">
+                      <h3 className="font-medium">Event Organisers</h3>
+                      <Button size="sm" onClick={handleAddOrganiser}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Event Organiser
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {organisers.map((org) => (
+                        <div
+                          key={org.id}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleOrganiserClick(org)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleOrganiserClick(org); }}
+                          className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-muted/50"
+                        >
+                          <div className="flex items-center space-x-3 flex-1">
+                            <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{org.name}</p>
+                              <p className="text-sm text-muted-foreground truncate">{org.supportEmail}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2 ml-2 flex-shrink-0">
+                            <div className="text-right">
+                              <span className="text-sm font-medium block">{org.eventsManaged}</span>
+                              <span className="text-xs text-muted-foreground">events</span>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditOrganiserClick(org);
+                            }}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Right Column - Calendar (1/3 width) */}
+              <Card className="md:col-span-1">
+                <CardHeader className="space-y-1 pb-1">
+                  <div className="flex flex-row items-center justify-between space-y-0">
+                    <CardTitle className="font-bold">Event Calendar</CardTitle>
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <Button variant="ghost" size="sm" onClick={() => navigateMonth(-1)} className="h-6 w-6 p-0 flex-shrink-0">
+                      <span className="text-lg">‹</span>
+                    </Button>
+                    <div className="text-sm font-medium w-[140px] text-center">{getMonthName(currentMonth)} 2025</div>
+                    <Button variant="ghost" size="sm" onClick={() => navigateMonth(1)} className="h-6 w-6 p-0 flex-shrink-0">
+                      <span className="text-lg">›</span>
                     </Button>
                   </div>
-
-                  <div className="space-y-2">
-                    {organisers.map((org) => (
-                      <div
-                        key={org.id}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => handleOrganiserClick(org)}
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleOrganiserClick(org); }}
-                        className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-muted/50"
-                      >
-                        <div className="flex items-center space-x-3 flex-1">
-                          <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{org.name}</p>
-                            <p className="text-sm text-muted-foreground truncate">{org.supportEmail}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-2 flex-shrink-0">
-                          <div className="text-right">
-                            <span className="text-sm font-medium block">{org.eventsManaged}</span>
-                            <span className="text-xs text-muted-foreground">events</span>
-                          </div>
-                          <Button variant="ghost" size="sm" onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditOrganiserClick(org);
-                          }}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                </CardHeader>
+                <CardContent className="p-3">
+                  {/* Calendar Header - Days of Week */}
+                  <div className="grid grid-cols-7 gap-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+                    <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">M</div>
+                    <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">T</div>
+                    <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">W</div>
+                    <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">T</div>
+                    <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">F</div>
+                    <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">S</div>
+                    <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">S</div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Top Section Layout moved down: Upcoming Events, Calendar & Potential Issues */}
-            <div className="grid gap-6 md:grid-cols-3">
+                  {/* Calendar Grid - Fixed aspect ratio grid */}
+                  <div className="grid grid-cols-7 gap-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+                    {generateCalendarDays().map((dayData, index) => {
+                      if (!dayData) {
+                        return <div key={`empty-${index}`} className="aspect-square"></div>;
+                      }
+
+                      const { day, events } = dayData;
+                      const today = new Date();
+                      const isToday = day === today.getDate() && currentMonth === today.getMonth();
+                      
+                      if (events.length === 0) {
+                        return (
+                          <div 
+                            key={day} 
+                            className={`aspect-square flex items-center justify-center text-[10px] border rounded transition-colors ${
+                              isToday ? 'bg-primary text-primary-foreground font-bold border-primary' : 'hover:bg-muted/50'
+                            }`}
+                          >
+                            {day}
+                          </div>
+                        );
+                      }
+
+                      // Define color map once for reuse
+                      const colorMap = {
+                        blue: { border: "border-blue-500", bg: "bg-blue-100", hover: "hover:bg-blue-200", text: "text-blue-600" },
+                        green: { border: "border-green-500", bg: "bg-green-100", hover: "hover:bg-green-200", text: "text-green-600" },
+                        purple: { border: "border-purple-500", bg: "bg-purple-100", hover: "hover:bg-purple-200", text: "text-purple-600" }
+                      };
+
+                      if (events.length === 1) {
+                        const event = events[0];
+                        const colors = colorMap[event.color as keyof typeof colorMap] || colorMap.blue;
+
+                        return (
+                          <Tooltip key={day}>
+                            <TooltipTrigger asChild>
+                              <div 
+                                className={`aspect-square flex items-center justify-center text-[10px] border ${colors.border} ${colors.bg} rounded font-semibold cursor-pointer ${colors.hover} transition-colors ${
+                                  isToday ? 'ring-1 ring-primary ring-offset-1' : ''
+                                }`}
+                                onClick={() => handleEventClick(event)}
+                              >
+                                {day}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="space-y-1">
+                                <p className="font-semibold">{event.name}</p>
+                                <p className="text-xs">{event.date}</p>
+                                <p className="text-xs">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      }
+
+                      // Multiple events (2 or more) - show split color view (vertical split - side by side)
+                      // On hover, the entire cell fills with the hovered event's color
+                      return (
+                        <div 
+                          key={day}
+                          className={`aspect-square text-[10px] relative rounded overflow-hidden border ${
+                            isToday ? 'ring-1 ring-primary ring-offset-1 border-primary' : 'border-gray-300'
+                          }`}
+                        >
+                          <div className="absolute inset-0 flex">
+                            {events.map((event, idx) => {
+                              const colors = colorMap[event.color as keyof typeof colorMap] || colorMap.blue;
+                              const isFirst = idx === 0;
+                              
+                              return (
+                                <Tooltip key={event.id}>
+                                  <TooltipTrigger asChild>
+                                    <div 
+                                      className={`flex-1 ${colors.bg} flex items-center justify-center cursor-pointer relative group ${
+                                        isFirst ? '' : 'border-l'
+                                      } ${colors.border}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleEventClick(event);
+                                      }}
+                                    >
+                                      {/* Hover overlay that fills the entire cell with smooth transition */}
+                                      <div 
+                                        className={`absolute inset-0 ${colors.bg} opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out`}
+                                        style={{ 
+                                          zIndex: 5
+                                        }} 
+                                      />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <div className="space-y-1">
+                                      <p className={`font-semibold ${colors.text}`}>{event.name}</p>
+                                      <p className="text-xs">{event.date}</p>
+                                      <p className="text-xs">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              );
+                            })}
+                          </div>
+                          <span className="absolute inset-0 flex items-center justify-center z-10 font-semibold pointer-events-none">{day}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Upcoming Events & Potential Issues */}
+            <div className="grid gap-6 md:grid-cols-2">
               {/* Left Column - Upcoming Events */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                  <CardTitle>Upcoming Events</CardTitle>
+                  <CardTitle className="font-bold">Upcoming Events</CardTitle>
                   <Calendar className="h-5 w-5 text-blue-600" />
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div 
                     className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
-                    onClick={() => handleEventClick({
-                      id: 1,
-                      name: "Tech Conference 2025",
-                      date: "January 22-24, 2025",
-                      location: "Las Vegas Convention Center",
-                      exhibitorCount: 45,
-                      visitorCount: 1200
-                    })}
+                    onClick={() => handleEventClick(
+                      {
+                        id: 1,
+                        name: "Tech Conference 2025",
+                        date: "January 22-24, 2025",
+                        location: "Las Vegas Convention Center",
+                        exhibitorCount: 45,
+                        visitorCount: 1200
+                      },
+                      organisers[1]
+                    )}
                   >
-                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-blue-500 text-white rounded flex-shrink-0">
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
                       <span className="text-xs">Wed</span>
                       <span className="font-bold">22</span>
                     </div>
@@ -398,16 +658,19 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
 
                   <div 
                     className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
-                    onClick={() => handleEventClick({
-                      id: 2,
-                      name: "Innovation Summit",
-                      date: "January 24-26, 2025",
-                      location: "Chicago Convention Center",
-                      exhibitorCount: 32,
-                      visitorCount: 850
-                    })}
+                    onClick={() => handleEventClick(
+                      {
+                        id: 2,
+                        name: "Innovation Summit",
+                        date: "January 24-26, 2025",
+                        location: "Chicago Convention Center",
+                        exhibitorCount: 32,
+                        visitorCount: 850
+                      },
+                      organisers[0]
+                    )}
                   >
-                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-green-500 text-white rounded flex-shrink-0">
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
                       <span className="text-xs">Fri</span>
                       <span className="font-bold">24</span>
                     </div>
@@ -419,16 +682,19 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
 
                   <div 
                     className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
-                    onClick={() => handleEventClick({
-                      id: 3,
-                      name: "Digital Expo",
-                      date: "January 26-28, 2025",
-                      location: "San Francisco Expo Center",
-                      exhibitorCount: 28,
-                      visitorCount: 620
-                    })}
+                    onClick={() => handleEventClick(
+                      {
+                        id: 3,
+                        name: "Digital Expo",
+                        date: "January 26-28, 2025",
+                        location: "San Francisco Expo Center",
+                        exhibitorCount: 28,
+                        visitorCount: 620
+                      },
+                      organisers[2]
+                    )}
                   >
-                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-purple-500 text-white rounded flex-shrink-0">
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
                       <span className="text-xs">Sun</span>
                       <span className="font-bold">26</span>
                     </div>
@@ -440,278 +706,10 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                 </CardContent>
               </Card>
 
-              {/* Middle Column - Calendar */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                  <CardTitle>January 2025</CardTitle>
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {/* Calendar Header - Days of Week */}
-                    <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground mb-2">
-                      <div>Sun</div>
-                      <div>Mon</div>
-                      <div>Tue</div>
-                      <div>Wed</div>
-                      <div>Thu</div>
-                      <div>Fri</div>
-                      <div>Sat</div>
-                    </div>
-
-                    {/* Calendar Grid */}
-                    <div className="grid grid-cols-7 gap-1">
-                      {/* Week 1 - Empty cells for days before month starts (Jan 1 is Wed) */}
-                      <div className="aspect-square"></div>
-                      <div className="aspect-square"></div>
-                      <div className="aspect-square"></div>
-                      
-                      {/* Jan 1-4 */}
-                      {[1, 2, 3, 4].map(day => (
-                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
-                          {day}
-                        </div>
-                      ))}
-
-                      {/* Week 2 - Jan 5-11 */}
-                      {[5, 6, 7, 8, 9, 10, 11].map(day => (
-                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
-                          {day}
-                        </div>
-                      ))}
-
-                      {/* Week 3 - Jan 12-18 */}
-                      {[12, 13, 14, 15, 16, 17, 18].map(day => (
-                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
-                          {day}
-                        </div>
-                      ))}
-
-                      {/* Week 4 - Jan 19-25 */}
-                      {[19, 20, 21].map(day => (
-                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
-                          {day}
-                        </div>
-                      ))}
-                      
-                      {/* Jan 22-24 - Tech Conference (Blue) */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div 
-                            className="aspect-square flex items-center justify-center text-sm border-2 border-blue-500 bg-blue-100 rounded font-semibold cursor-pointer hover:bg-blue-200 transition-colors"
-                            onClick={() => handleEventClick({
-                              id: 1,
-                              name: "Tech Conference 2025",
-                              date: "January 22-24, 2025",
-                              location: "Las Vegas Convention Center",
-                              exhibitorCount: 45,
-                              visitorCount: 1200
-                            })}
-                          >
-                            22
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className="space-y-1">
-                            <p className="font-semibold">Tech Conference 2025</p>
-                            <p className="text-xs">Jan 22-24, 2025</p>
-                            <p className="text-xs">45 exhibitors • 1,200 visitors</p>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div 
-                            className="aspect-square flex items-center justify-center text-sm border-2 border-blue-500 bg-blue-100 rounded font-semibold cursor-pointer hover:bg-blue-200 transition-colors"
-                            onClick={() => handleEventClick({
-                              id: 1,
-                              name: "Tech Conference 2025",
-                              date: "January 22-24, 2025",
-                              location: "Las Vegas Convention Center",
-                              exhibitorCount: 45,
-                              visitorCount: 1200
-                            })}
-                          >
-                            23
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className="space-y-1">
-                            <p className="font-semibold">Tech Conference 2025</p>
-                            <p className="text-xs">Jan 22-24, 2025</p>
-                            <p className="text-xs">45 exhibitors • 1,200 visitors</p>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div 
-                            className="aspect-square flex items-center justify-center text-sm relative cursor-pointer"
-                            onClick={(e) => {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const clickY = e.clientY - rect.top;
-                              if (clickY < rect.height / 2) {
-                                handleEventClick({
-                                  id: 1,
-                                  name: "Tech Conference 2025",
-                                  date: "January 22-24, 2025",
-                                  location: "Las Vegas Convention Center",
-                                  exhibitorCount: 45,
-                                  visitorCount: 1200
-                                });
-                              } else {
-                                handleEventClick({
-                                  id: 2,
-                                  name: "Innovation Summit",
-                                  date: "January 24-26, 2025",
-                                  location: "Chicago Convention Center",
-                                  exhibitorCount: 32,
-                                  visitorCount: 850
-                                });
-                              }
-                            }}
-                          >
-                            <div className="absolute inset-0 border-t-2 border-l-2 border-r-2 border-blue-500 bg-blue-100 rounded-t hover:bg-blue-200 transition-colors" style={{ height: '50%' }}></div>
-                            <div className="absolute inset-0 top-1/2 border-b-2 border-l-2 border-r-2 border-green-500 bg-green-100 rounded-b hover:bg-green-200 transition-colors" style={{ height: '50%' }}></div>
-                            <span className="relative z-10 font-semibold">24</span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className="space-y-2">
-                            <div className="space-y-1 border-b pb-2">
-                              <p className="font-semibold text-blue-600">Tech Conference 2025</p>
-                              <p className="text-xs">Jan 22-24, 2025</p>
-                              <p className="text-xs">45 exhibitors • 1,200 visitors</p>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="font-semibold text-green-600">Innovation Summit</p>
-                              <p className="text-xs">Jan 24-26, 2025</p>
-                              <p className="text-xs">32 exhibitors • 850 visitors</p>
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <div className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
-                        25
-                      </div>
-
-                      {/* Week 5 - Jan 26-31 */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div 
-                            className="aspect-square flex items-center justify-center text-sm relative cursor-pointer"
-                            onClick={(e) => {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const clickY = e.clientY - rect.top;
-                              if (clickY < rect.height / 2) {
-                                handleEventClick({
-                                  id: 2,
-                                  name: "Innovation Summit",
-                                  date: "January 24-26, 2025",
-                                  location: "Chicago Convention Center",
-                                  exhibitorCount: 32,
-                                  visitorCount: 850
-                                });
-                              } else {
-                                handleEventClick({
-                                  id: 3,
-                                  name: "Digital Expo",
-                                  date: "January 26-28, 2025",
-                                  location: "San Francisco Expo Center",
-                                  exhibitorCount: 28,
-                                  visitorCount: 620
-                                });
-                              }
-                            }}
-                          >
-                            <div className="absolute inset-0 border-t-2 border-l-2 border-r-2 border-green-500 bg-green-100 rounded-t hover:bg-green-200 transition-colors" style={{ height: '50%' }}></div>
-                            <div className="absolute inset-0 top-1/2 border-b-2 border-l-2 border-r-2 border-purple-500 bg-purple-100 rounded-b hover:bg-purple-200 transition-colors" style={{ height: '50%' }}></div>
-                            <span className="relative z-10 font-semibold">26</span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className="space-y-2">
-                            <div className="space-y-1 border-b pb-2">
-                              <p className="font-semibold text-green-600">Innovation Summit</p>
-                              <p className="text-xs">Jan 24-26, 2025</p>
-                              <p className="text-xs">32 exhibitors • 850 visitors</p>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="font-semibold text-purple-600">Digital Expo</p>
-                              <p className="text-xs">Jan 26-28, 2025</p>
-                              <p className="text-xs">28 exhibitors • 620 visitors</p>
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div 
-                            className="aspect-square flex items-center justify-center text-sm border-2 border-purple-500 bg-purple-100 rounded font-semibold cursor-pointer hover:bg-purple-200 transition-colors"
-                            onClick={() => handleEventClick({
-                              id: 3,
-                              name: "Digital Expo",
-                              date: "January 26-28, 2025",
-                              location: "San Francisco Expo Center",
-                              exhibitorCount: 28,
-                              visitorCount: 620
-                            })}
-                          >
-                            27
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className="space-y-1">
-                            <p className="font-semibold">Digital Expo</p>
-                            <p className="text-xs">Jan 26-28, 2025</p>
-                            <p className="text-xs">28 exhibitors • 620 visitors</p>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div 
-                            className="aspect-square flex items-center justify-center text-sm border-2 border-purple-500 bg-purple-100 rounded font-semibold cursor-pointer hover:bg-purple-200 transition-colors"
-                            onClick={() => handleEventClick({
-                              id: 3,
-                              name: "Digital Expo",
-                              date: "January 26-28, 2025",
-                              location: "San Francisco Expo Center",
-                              exhibitorCount: 28,
-                              visitorCount: 620
-                            })}
-                          >
-                            28
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className="space-y-1">
-                            <p className="font-semibold">Digital Expo</p>
-                            <p className="text-xs">Jan 26-28, 2025</p>
-                            <p className="text-xs">28 exhibitors • 620 visitors</p>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      {[29, 30, 31].map(day => (
-                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
-                          {day}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Right Column - Potential Issues */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                  <CardTitle>Potential Issues</CardTitle>
+                  <CardTitle className="font-bold">Potential Issues</CardTitle>
                   <AlertTriangle className="h-5 w-5 text-red-600" />
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -870,6 +868,39 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                 {editingOrganiser ? "Update Organiser" : "Save Organiser"}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Event Selection Dialog for dates with multiple events */}
+      <Dialog open={isEventSelectDialogOpen} onOpenChange={setIsEventSelectDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Select Event</DialogTitle>
+            <DialogDescription>
+              Multiple events on this date. Choose one to view:
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3">
+            {selectedDateEvents?.map((event) => (
+              <div
+                key={event.id}
+                className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => {
+                  handleEventClick(event);
+                  setIsEventSelectDialogOpen(false);
+                }}
+              >
+                <h4 className="font-semibold mb-1">{event.name}</h4>
+                <p className="text-sm text-muted-foreground mb-2">{event.date}</p>
+                <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                  <span>{event.exhibitorCount} exhibitors</span>
+                  <span>•</span>
+                  <span>{event.visitorCount.toLocaleString()} visitors</span>
+                </div>
+              </div>
+            ))}
           </div>
         </DialogContent>
       </Dialog>
