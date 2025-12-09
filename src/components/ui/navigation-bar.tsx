@@ -15,7 +15,7 @@ import { ChevronDown, Settings, HelpCircle, LogOut } from "lucide-react";
 const roleColors = {
   "User": "bg-blue-100 text-blue-800",
   "Admin": "bg-purple-100 text-purple-800", 
-  "Event Organiser": "bg-green-100 text-green-800",
+  "Event Admin": "bg-green-100 text-green-800",
   "Event Organiser": "bg-orange-100 text-orange-800",
   "Super Admin": "bg-red-100 text-red-800"
 };
