@@ -227,6 +227,11 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
     setInboxFilters({});
   };
 
+  const handleEventClick = (event) => {
+    // Navigate to EventAdminDashboard for the selected event
+    onNavigate("event-admin-dashboard", { event });
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       <DeveloperLabel 
@@ -361,8 +366,8 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
               </CardContent>
             </Card>
 
-            {/* Top Section Layout moved down: Upcoming Events & Potential Issues */}
-            <div className="grid gap-6 md:grid-cols-2">
+            {/* Top Section Layout moved down: Upcoming Events, Calendar & Potential Issues */}
+            <div className="grid gap-6 md:grid-cols-3">
               {/* Left Column - Upcoming Events */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
@@ -370,36 +375,334 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                   <Calendar className="h-5 w-5 text-blue-600" />
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-blue-500 text-white rounded">
+                  <div 
+                    className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => handleEventClick({
+                      id: 1,
+                      name: "Tech Conference 2025",
+                      date: "January 22-24, 2025",
+                      location: "Las Vegas Convention Center",
+                      exhibitorCount: 45,
+                      visitorCount: 1200
+                    })}
+                  >
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-blue-500 text-white rounded flex-shrink-0">
                       <span className="text-xs">Wed</span>
                       <span className="font-bold">22</span>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">Tech Conference 2025</h4>
-                      <p className="text-sm text-muted-foreground">EventPro Management • 45 companies</p>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">Tech Conference 2025</h4>
+                      <p className="text-sm text-muted-foreground truncate">EventPro Management • 45 companies</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-4">
-                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-blue-500 text-white rounded">
+                  <div 
+                    className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => handleEventClick({
+                      id: 2,
+                      name: "Innovation Summit",
+                      date: "January 24-26, 2025",
+                      location: "Chicago Convention Center",
+                      exhibitorCount: 32,
+                      visitorCount: 850
+                    })}
+                  >
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-green-500 text-white rounded flex-shrink-0">
                       <span className="text-xs">Fri</span>
                       <span className="font-bold">24</span>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">Innovation Summit</h4>
-                      <p className="text-sm text-muted-foreground">City Events Ltd • 32 companies</p>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">Innovation Summit</h4>
+                      <p className="text-sm text-muted-foreground truncate">City Events Ltd • 32 companies</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-4">
-                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-blue-500 text-white rounded">
+                  <div 
+                    className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => handleEventClick({
+                      id: 3,
+                      name: "Digital Expo",
+                      date: "January 26-28, 2025",
+                      location: "San Francisco Expo Center",
+                      exhibitorCount: 28,
+                      visitorCount: 620
+                    })}
+                  >
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-purple-500 text-white rounded flex-shrink-0">
                       <span className="text-xs">Sun</span>
                       <span className="font-bold">26</span>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">Digital Expo</h4>
-                      <p className="text-sm text-muted-foreground">TradeShow Organization • 28 companies</p>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">Digital Expo</h4>
+                      <p className="text-sm text-muted-foreground truncate">TradeShow Organization • 28 companies</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Middle Column - Calendar */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                  <CardTitle>January 2025</CardTitle>
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {/* Calendar Header - Days of Week */}
+                    <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground mb-2">
+                      <div>Sun</div>
+                      <div>Mon</div>
+                      <div>Tue</div>
+                      <div>Wed</div>
+                      <div>Thu</div>
+                      <div>Fri</div>
+                      <div>Sat</div>
+                    </div>
+
+                    {/* Calendar Grid */}
+                    <div className="grid grid-cols-7 gap-1">
+                      {/* Week 1 - Empty cells for days before month starts (Jan 1 is Wed) */}
+                      <div className="aspect-square"></div>
+                      <div className="aspect-square"></div>
+                      <div className="aspect-square"></div>
+                      
+                      {/* Jan 1-4 */}
+                      {[1, 2, 3, 4].map(day => (
+                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
+                          {day}
+                        </div>
+                      ))}
+
+                      {/* Week 2 - Jan 5-11 */}
+                      {[5, 6, 7, 8, 9, 10, 11].map(day => (
+                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
+                          {day}
+                        </div>
+                      ))}
+
+                      {/* Week 3 - Jan 12-18 */}
+                      {[12, 13, 14, 15, 16, 17, 18].map(day => (
+                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
+                          {day}
+                        </div>
+                      ))}
+
+                      {/* Week 4 - Jan 19-25 */}
+                      {[19, 20, 21].map(day => (
+                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
+                          {day}
+                        </div>
+                      ))}
+                      
+                      {/* Jan 22-24 - Tech Conference (Blue) */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className="aspect-square flex items-center justify-center text-sm border-2 border-blue-500 bg-blue-100 rounded font-semibold cursor-pointer hover:bg-blue-200 transition-colors"
+                            onClick={() => handleEventClick({
+                              id: 1,
+                              name: "Tech Conference 2025",
+                              date: "January 22-24, 2025",
+                              location: "Las Vegas Convention Center",
+                              exhibitorCount: 45,
+                              visitorCount: 1200
+                            })}
+                          >
+                            22
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="space-y-1">
+                            <p className="font-semibold">Tech Conference 2025</p>
+                            <p className="text-xs">Jan 22-24, 2025</p>
+                            <p className="text-xs">45 exhibitors • 1,200 visitors</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className="aspect-square flex items-center justify-center text-sm border-2 border-blue-500 bg-blue-100 rounded font-semibold cursor-pointer hover:bg-blue-200 transition-colors"
+                            onClick={() => handleEventClick({
+                              id: 1,
+                              name: "Tech Conference 2025",
+                              date: "January 22-24, 2025",
+                              location: "Las Vegas Convention Center",
+                              exhibitorCount: 45,
+                              visitorCount: 1200
+                            })}
+                          >
+                            23
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="space-y-1">
+                            <p className="font-semibold">Tech Conference 2025</p>
+                            <p className="text-xs">Jan 22-24, 2025</p>
+                            <p className="text-xs">45 exhibitors • 1,200 visitors</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className="aspect-square flex items-center justify-center text-sm relative cursor-pointer"
+                            onClick={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const clickY = e.clientY - rect.top;
+                              if (clickY < rect.height / 2) {
+                                handleEventClick({
+                                  id: 1,
+                                  name: "Tech Conference 2025",
+                                  date: "January 22-24, 2025",
+                                  location: "Las Vegas Convention Center",
+                                  exhibitorCount: 45,
+                                  visitorCount: 1200
+                                });
+                              } else {
+                                handleEventClick({
+                                  id: 2,
+                                  name: "Innovation Summit",
+                                  date: "January 24-26, 2025",
+                                  location: "Chicago Convention Center",
+                                  exhibitorCount: 32,
+                                  visitorCount: 850
+                                });
+                              }
+                            }}
+                          >
+                            <div className="absolute inset-0 border-t-2 border-l-2 border-r-2 border-blue-500 bg-blue-100 rounded-t hover:bg-blue-200 transition-colors" style={{ height: '50%' }}></div>
+                            <div className="absolute inset-0 top-1/2 border-b-2 border-l-2 border-r-2 border-green-500 bg-green-100 rounded-b hover:bg-green-200 transition-colors" style={{ height: '50%' }}></div>
+                            <span className="relative z-10 font-semibold">24</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="space-y-2">
+                            <div className="space-y-1 border-b pb-2">
+                              <p className="font-semibold text-blue-600">Tech Conference 2025</p>
+                              <p className="text-xs">Jan 22-24, 2025</p>
+                              <p className="text-xs">45 exhibitors • 1,200 visitors</p>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-semibold text-green-600">Innovation Summit</p>
+                              <p className="text-xs">Jan 24-26, 2025</p>
+                              <p className="text-xs">32 exhibitors • 850 visitors</p>
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <div className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
+                        25
+                      </div>
+
+                      {/* Week 5 - Jan 26-31 */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className="aspect-square flex items-center justify-center text-sm relative cursor-pointer"
+                            onClick={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const clickY = e.clientY - rect.top;
+                              if (clickY < rect.height / 2) {
+                                handleEventClick({
+                                  id: 2,
+                                  name: "Innovation Summit",
+                                  date: "January 24-26, 2025",
+                                  location: "Chicago Convention Center",
+                                  exhibitorCount: 32,
+                                  visitorCount: 850
+                                });
+                              } else {
+                                handleEventClick({
+                                  id: 3,
+                                  name: "Digital Expo",
+                                  date: "January 26-28, 2025",
+                                  location: "San Francisco Expo Center",
+                                  exhibitorCount: 28,
+                                  visitorCount: 620
+                                });
+                              }
+                            }}
+                          >
+                            <div className="absolute inset-0 border-t-2 border-l-2 border-r-2 border-green-500 bg-green-100 rounded-t hover:bg-green-200 transition-colors" style={{ height: '50%' }}></div>
+                            <div className="absolute inset-0 top-1/2 border-b-2 border-l-2 border-r-2 border-purple-500 bg-purple-100 rounded-b hover:bg-purple-200 transition-colors" style={{ height: '50%' }}></div>
+                            <span className="relative z-10 font-semibold">26</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="space-y-2">
+                            <div className="space-y-1 border-b pb-2">
+                              <p className="font-semibold text-green-600">Innovation Summit</p>
+                              <p className="text-xs">Jan 24-26, 2025</p>
+                              <p className="text-xs">32 exhibitors • 850 visitors</p>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-semibold text-purple-600">Digital Expo</p>
+                              <p className="text-xs">Jan 26-28, 2025</p>
+                              <p className="text-xs">28 exhibitors • 620 visitors</p>
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className="aspect-square flex items-center justify-center text-sm border-2 border-purple-500 bg-purple-100 rounded font-semibold cursor-pointer hover:bg-purple-200 transition-colors"
+                            onClick={() => handleEventClick({
+                              id: 3,
+                              name: "Digital Expo",
+                              date: "January 26-28, 2025",
+                              location: "San Francisco Expo Center",
+                              exhibitorCount: 28,
+                              visitorCount: 620
+                            })}
+                          >
+                            27
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="space-y-1">
+                            <p className="font-semibold">Digital Expo</p>
+                            <p className="text-xs">Jan 26-28, 2025</p>
+                            <p className="text-xs">28 exhibitors • 620 visitors</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className="aspect-square flex items-center justify-center text-sm border-2 border-purple-500 bg-purple-100 rounded font-semibold cursor-pointer hover:bg-purple-200 transition-colors"
+                            onClick={() => handleEventClick({
+                              id: 3,
+                              name: "Digital Expo",
+                              date: "January 26-28, 2025",
+                              location: "San Francisco Expo Center",
+                              exhibitorCount: 28,
+                              visitorCount: 620
+                            })}
+                          >
+                            28
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="space-y-1">
+                            <p className="font-semibold">Digital Expo</p>
+                            <p className="text-xs">Jan 26-28, 2025</p>
+                            <p className="text-xs">28 exhibitors • 620 visitors</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      {[29, 30, 31].map(day => (
+                        <div key={day} className="aspect-square flex items-center justify-center text-sm border rounded hover:bg-muted/50">
+                          {day}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </CardContent>
