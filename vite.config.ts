@@ -4,7 +4,7 @@
   import path from 'path';
 
   export default defineConfig({
-    base: "/The-Badge-Scanner-Website-V2/",
+    base: "/The-Badge-Scanner-Website---V2/",
     plugins: [react()],
     resolve: {
       extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
