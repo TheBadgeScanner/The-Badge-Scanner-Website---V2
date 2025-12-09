@@ -1,0 +1,504 @@
+// File: styles/globals.css
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 14px;
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #030213;
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.0058 264.53);
+  --secondary-foreground: #030213;
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --accent: #e9ebef;
+  --accent-foreground: #030213;
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: transparent;
+  --input-background: #f3f3f5;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #030213;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  --container-lg: 32rem;
+  --bubble-chart-container: 80%;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/**
+ * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
+ */
+@layer base {
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+    h1 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h2 {
+      font-size: var(--text-3xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    p {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+  }
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+/* Custom scrollbar styling for popups */
+@layer components {
+  .popup-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #9ca3af #e5e7eb;
+  }
+  
+  .popup-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .popup-scrollbar::-webkit-scrollbar-track {
+    background: #e5e7eb;
+    border-radius: 4px;
+  }
+  
+  .popup-scrollbar::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 4px;
+  }
+  
+  .popup-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+
+  /* Multi-line tooltip styling */
+  .tooltip-multiline {
+    white-space: pre-wrap;
+    max-width: 300px;
+    line-height: 1.4;
+  }
+
+  /* Superscript styling with decimal point included */
+  .decimal-superscript {
+    position: relative;
+    top: -0.35em;
+    font-size: 0.7em;
+  }
+
+  /* Enhanced guided tour highlight with brighter border and better contrast */
+  .tour-highlight {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.8), 0 0 0 6px rgba(59, 130, 246, 0.6) !important;
+    border-radius: 8px !important;
+    position: relative !important;
+    z-index: 1001 !important;
+    background: rgba(255, 255, 255, 0.00) !important;
+  }
+
+  /* Special highlighting for tab elements to avoid obscuring text */
+  .tour-highlight-tab {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), 0 0 0 4px rgba(59, 130, 246, 0.6) !important;
+    border-radius: 6px !important;
+    position: relative !important;
+    z-index: 1002 !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+  }
+
+  /* Special highlighting for buttons against dark backgrounds */
+  .tour-highlight-button {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 0 5px rgba(34, 197, 94, 0.6) !important;
+    border-radius: 8px !important;
+    position: relative !important;
+    z-index: 1001 !important;
+  }
+
+  /* Quadrant highlighting for bubble chart tour */
+  .tour-highlight-quadrant {
+    position: absolute !important;
+    border: 3px solid rgba(59, 130, 246, 0.8) !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+    border-radius: 8px !important;
+    z-index: 1003 !important;
+    pointer-events: none !important;
+  }
+
+  /* Bubble chart specific dialog - make fully scrollable */
+  .bubble-chart-dialog .sm\:max-w-7xl {
+    max-width: 80% !important;
+  }
+
+  /* Make the entire dialog scrollable */
+  .bubble-chart-dialog {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Remove any height constraints that prevent scrolling */
+  .bubble-chart-dialog [data-radix-scroll-area-content] {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Remove fixed flex height constraints */
+  .bubble-chart-dialog .flex.flex-col {
+    height: auto !important;
+    min-height: 0 !important;
+    flex: none !important;
+  }
+
+  /* Allow content to flow naturally */
+  .bubble-chart-dialog .flex-1 {
+    flex: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Ensure chart tips don't overflow */
+  .bubble-chart-dialog .grid {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .bubble-chart-dialog .grid > div {
+    flex-shrink: 0;
+    min-width: 0;
+  }
+
+  /* Make chart area have reasonable fixed height */
+  .bubble-chart-dialog .chart-container,
+  .bubble-chart-dialog .bg-white.rounded-lg.border.p-4 {
+    min-height: 320px !important;
+    height: 400px !important;
+    overflow: hidden !important;
+  }
+
+  /* Ensure ResponsiveContainer works in scrollable context */
+  .bubble-chart-dialog .recharts-responsive-container {
+    height: 100% !important;
+    min-height: 320px !important;
+  }
+
+  /* Override any min-h-0 that prevents scrolling */
+  .bubble-chart-dialog [class*="min-h-0"] {
+    min-height: auto !important;
+  }
+
+  /* Generic rule for any dialog containing bubble chart content */
+  [data-state="open"][role="dialog"]:has([data-key*="cell-"]) {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Target dialogs with bubble chart indicators */
+  [data-state="open"][role="dialog"]:has(.recharts-scatter) {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Target dialogs containing "Company Performance Analysis" */
+  [data-state="open"][role="dialog"]:has([role="heading"]:contains("Company Performance Analysis")) {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Standard popup width for other dialogs */
+  @media (width >= 40rem) {
+    .sm\:max-w-lg {
+      max-width: var(--container-lg);
+    }
+  }
+
+  /* Fix superscript positioning */
+  sup {
+    position: relative;
+    top: -0.35em;
+    font-size: 0.7em;
+  }
+
+  /* Utility class for manual text selection */
+  .select-all {
+    user-select: all;
+    -webkit-user-select: all;
+    -moz-user-select: all;
+    -ms-user-select: all;
+  }
+
+  /* Clipboard fallback modal styling */
+  .clipboard-fallback-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .clipboard-fallback-dialog {
+    background: var(--background);
+    color: var(--foreground);
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+  }
+
+  .clipboard-fallback-textarea {
+    width: 100%;
+    height: 80px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    resize: none;
+    margin-bottom: 15px;
+    background: var(--input-background);
+    color: var(--foreground);
+  }
+
+  .clipboard-fallback-button {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .clipboard-fallback-button:hover {
+    opacity: 0.9;
+  }
+
+  /* Remove focus outlines from chart elements */
+  .recharts-wrapper,
+  .recharts-surface,
+  .recharts-layer,
+  .recharts-cartesian-grid,
+  .recharts-line,
+  .recharts-dot,
+  .recharts-active-dot {
+    outline: none !important;
+  }
+
+  /* Remove focus styles from ResponsiveContainer */
+  .recharts-responsive-container {
+    outline: none !important;
+  }
+  
+  .recharts-responsive-container:focus {
+    outline: none !important;
+  }
+
+  /* Bubble chart quadrant hover effects */
+  .bubble-chart-quadrant-overlay {
+    transition: all 0.2s ease-in-out;
+    z-index: 10;
+  }
+
+  /* Enhanced bubble hover effects */
+  .recharts-scatter-symbol {
+    transition: all 0.15s ease-in-out !important;
+  }
+
+  .recharts-scatter-symbol:hover {
+    filter: brightness(1.1) !important;
+    transform: scale(1.05) !important;
+  }
+
+  /* Smooth quadrant highlighting animation */
+  @keyframes quadrantHighlight {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .quadrant-highlight {
+    animation: quadrantHighlight 0.2s ease-out;
+  }
+
+  /* Fade in and out animation for clipboard tooltip */
+  @keyframes fadeInOut {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-4px);
+    }
+    20% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    80% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-4px);
+    }
+  }
+
+  .animate-fade-in-out {
+    animation: fadeInOut 1s ease-in-out;
+  }
+}

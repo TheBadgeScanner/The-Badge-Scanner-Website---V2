@@ -1,0 +1,472 @@
+// File: components/constants/mockData.ts
+// Mock hourly leads data
+export const mockHourlyData = [
+  { hour: "9 AM", leads: 12 },
+  { hour: "10 AM", leads: 25 },
+  { hour: "11 AM", leads: 38 },
+  { hour: "12 PM", leads: 22 },
+  { hour: "1 PM", leads: 18 },
+  { hour: "2 PM", leads: 31 },
+  { hour: "3 PM", leads: 42 },
+  { hour: "4 PM", leads: 35 },
+  { hour: "5 PM", leads: 19 },
+];
+
+// Mock warmth distribution data - includes None category for uncaptured lead quality
+export const mockWarmthData = [
+  { name: "None", value: 12, color: "#9CA3AF" },
+  { name: "Info Only", value: 23, color: "#6B7280" },
+  { name: "Cold", value: 45, color: "#3B82F6" },
+  { name: "Warm", value: 89, color: "#F97316" },
+  { name: "Hot", value: 67, color: "#EF4444" }
+];
+
+// Mock team users data
+export const mockTeamUsers = [
+  {
+    id: 1,
+    name: "John Doe",
+    email: "john@company.com",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    totalLeads: 12,
+    avgSalesIntel: 8.2,
+    avgConversion: 7.5,
+    overallScore: 7.9,
+    isActivated: true
+  },
+  {
+    id: 2,
+    name: "Sarah Wilson",
+    email: "sarah@company.com", 
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+    totalLeads: 18,
+    avgSalesIntel: 9.1,
+    avgConversion: 8.3,
+    overallScore: 8.7,
+    isActivated: true
+  },
+  {
+    id: 3,
+    name: "Mike Chen",
+    email: "mike@company.com",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face", 
+    totalLeads: 8,
+    avgSalesIntel: 6.8,
+    avgConversion: 6.2,
+    overallScore: 6.5,
+    isActivated: true
+  },
+  {
+    id: 4,
+    name: "Lisa Rodriguez",
+    email: "lisa@company.com",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    totalLeads: 15,
+    avgSalesIntel: 7.9,
+    avgConversion: 7.1,
+    overallScore: 7.5,
+    isActivated: true
+  },
+  {
+    id: 5,
+    name: "David Park",
+    email: "david@company.com",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    totalLeads: 3,
+    avgSalesIntel: 0,
+    avgConversion: 0,
+    overallScore: 0,
+    isActivated: false
+  }
+];
+
+// Mock all leads data with enhanced fields - expanded for team dashboard
+export const mockAllLeads = [
+  { 
+    id: 1, 
+    name: "Sarah Johnson", 
+    jobTitle: "VP of Technology",
+    email: "sarah.j@techcorp.com",
+    company: "TechCorp Inc", 
+    industry: "Technology",
+    companySize: "500-1000 employees",
+    language: "English",
+    phone: "+1 (555) 123-4567",
+    leadType: "Hot",
+    priority: "High",
+    timeframe: "ASAP",
+    salesIntelScore: 9, 
+    conversionScore: 8, 
+    summary: "Enterprise decision maker with approved budget. Highly interested in our platform integration capabilities.",
+    notes: "Interested in enterprise solution. Mentioned they're looking to replace their current system within Q2. Has decision-making authority.",
+    voiceMemos: [
+      { id: 1, duration: "3:45", title: "Initial conversation", timestamp: "10:30 AM" },
+      { id: 2, duration: "2:12", title: "Follow-up questions", timestamp: "10:45 AM" }
+    ],
+    pictures: [
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1511578314322-379afb476865?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=300&h=200&fit=crop"
+    ],
+    products: ["Enterprise Platform", "Integration Module", "Security Suite"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T10:30:00Z",
+    capturedHour: "10 AM",
+    capturedBy: "John Doe",
+    capturedById: 1,
+    hasPhoto: true,
+    photoUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+  },
+  { 
+    id: 2, 
+    name: "Michael Chen", 
+    jobTitle: "Operations Manager",
+    email: "m.chen@innovate.io",
+    company: "Innovate Solutions", 
+    industry: "Consulting",
+    companySize: "50-100 employees",
+    language: "English, Mandarin",
+    phone: "+1 (555) 234-5678",
+    leadType: "Warm",
+    priority: "Processing",
+    timeframe: "6+ months",
+    salesIntelScore: null, 
+    conversionScore: null, 
+    summary: null,
+    notes: "Wants pricing information and demo. Mentioned timeline is 6+ months but actively researching solutions.",
+    voiceMemos: [
+      { id: 1, duration: "2:12", title: "Product inquiry", timestamp: "11:45 AM" }
+    ],
+    pictures: [
+      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=200&fit=crop"
+    ],
+    products: ["Startup Solutions", "Analytics Dashboard"],
+    aiProcessed: false,
+    capturedAt: "2025-01-15T11:45:00Z",
+    capturedHour: "11 AM",
+    capturedBy: "Sarah Wilson",
+    capturedById: 2,
+    hasPhoto: false
+  },
+  { 
+    id: 3, 
+    name: "Emily Rodriguez", 
+    jobTitle: "CTO & Co-founder",
+    email: "emily.r@startupx.com",
+    company: "StartupX", 
+    industry: "SaaS",
+    companySize: "10-50 employees",
+    language: "English, Spanish",
+    phone: "+1 (555) 345-6789",
+    leadType: "Hot",
+    priority: "Medium",
+    timeframe: "2 months",
+    salesIntelScore: 8, 
+    conversionScore: 7, 
+    summary: "Technical founder of growing startup. Needs integration details and wants to discuss custom implementation.",
+    notes: "Needs integration details. Very technical discussion about API capabilities and scalability requirements.",
+    voiceMemos: [
+      { id: 1, duration: "4:22", title: "Technical discussion", timestamp: "2:20 PM" },
+      { id: 2, duration: "1:45", title: "API requirements", timestamp: "2:35 PM" }
+    ],
+    pictures: [
+      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=300&h=200&fit=crop"
+    ],
+    products: ["Integration Module", "Developer Tools", "API Gateway"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T14:20:00Z",
+    capturedHour: "2 PM",
+    capturedBy: "Mike Chen",
+    capturedById: 3,
+    hasPhoto: true,
+    photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+  },
+  { 
+    id: 4, 
+    name: "David Kim", 
+    jobTitle: "Director of Growth",
+    email: "david@growthco.com",
+    company: "Growth Co", 
+    industry: "Marketing",
+    companySize: "100-500 employees",
+    language: "English, Korean",
+    phone: "+1 (555) 456-7890",
+    leadType: "None",
+    priority: "Low",
+    timeframe: "Info only",
+    salesIntelScore: 3, 
+    conversionScore: 2, 
+    summary: "Early stage browsing with no immediate timeline. Collecting information for future reference.",
+    notes: "Just browsing, no immediate timeline. Took brochure but didn't express strong interest.",
+    voiceMemos: [
+      { id: 1, duration: "1:30", title: "Brief inquiry", timestamp: "3:10 PM" }
+    ],
+    pictures: [
+      "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=300&h=200&fit=crop"
+    ],
+    products: ["Marketing Analytics"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T15:10:00Z",
+    capturedHour: "3 PM",
+    capturedBy: "Lisa Rodriguez",
+    capturedById: 4,
+    hasPhoto: false
+  },
+  { 
+    id: 5, 
+    name: "Jessica Taylor", 
+    jobTitle: "Chief Executive Officer",
+    email: "j.taylor@megacorp.com",
+    company: "MegaCorp Ltd", 
+    industry: "Financial Services",
+    companySize: "1000+ employees",
+    language: "English",
+    phone: "+1 (555) 567-8901",
+    leadType: "None",
+    priority: "High",
+    timeframe: "ASAP",
+    salesIntelScore: 10, 
+    conversionScore: 9, 
+    summary: "C-level executive with immediate need and allocated budget. Ready to move forward with procurement process.",
+    notes: "Decision maker, budget approved. Looking to implement within next quarter. Extremely qualified prospect.",
+    voiceMemos: [
+      { id: 1, duration: "5:15", title: "Executive briefing", timestamp: "4:30 PM" },
+      { id: 2, duration: "3:22", title: "Budget discussion", timestamp: "4:45 PM" },
+      { id: 3, duration: "2:08", title: "Timeline planning", timestamp: "5:00 PM" }
+    ],
+    pictures: [
+      "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1573164574572-cb89e39749b4?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=300&h=200&fit=crop"
+    ],
+    products: ["Enterprise Platform", "High-Sustainability Matrix", "Compliance Suite", "Executive Dashboard"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T16:30:00Z",
+    capturedHour: "4 PM",
+    capturedBy: "Sarah Wilson",
+    capturedById: 2,
+    hasPhoto: true,
+    photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face"
+  },
+  // Additional leads for testing
+  { 
+    id: 6, 
+    name: "Alex Thompson", 
+    jobTitle: "Marketing Director",
+    email: "alex@startup.co",
+    company: "Innovation Labs", 
+    industry: "R&D",
+    companySize: "50-100 employees",
+    language: "English",
+    phone: "+1 (555) 678-9012",
+    leadType: "Warm",
+    priority: "Medium",
+    timeframe: "2 weeks",
+    salesIntelScore: 7, 
+    conversionScore: 6, 
+    summary: "Marketing director evaluating solutions for upcoming product launch. Has budget allocated.",
+    notes: "Looking for marketing automation tools. Interested in integration with existing CRM.",
+    voiceMemos: [],
+    pictures: [],
+    products: ["Marketing Analytics", "Integration Module"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T12:15:00Z",
+    capturedHour: "12 PM",
+    capturedBy: "John Doe",
+    capturedById: 1,
+    hasPhoto: false
+  },
+  { 
+    id: 7, 
+    name: "Rachel Green", 
+    jobTitle: "IT Manager",
+    email: "rachel@digitalco.com",
+    company: "Digital Solutions", 
+    industry: "Consulting",
+    companySize: "100-500 employees",
+    language: "English",
+    phone: "+1 (555) 789-0123",
+    leadType: "Cold",
+    priority: "Low",
+    timeframe: "6+ months",
+    salesIntelScore: 5, 
+    conversionScore: 4, 
+    summary: "IT manager in research phase. No immediate timeline but exploring options for future projects.",
+    notes: "Collecting information for potential future projects. No current budget allocated.",
+    voiceMemos: [
+      { id: 1, duration: "1:45", title: "General inquiry", timestamp: "1:30 PM" }
+    ],
+    pictures: [],
+    products: ["Developer Tools"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T13:30:00Z",
+    capturedHour: "1 PM",
+    capturedBy: "Mike Chen",
+    capturedById: 3,
+    hasPhoto: false
+  },
+  // Additional leads to show more team activity
+  { 
+    id: 8, 
+    name: "Robert Martinez", 
+    jobTitle: "COO",
+    email: "rob.m@techflow.com",
+    company: "TechFlow Systems", 
+    industry: "Technology",
+    companySize: "200-500 employees",
+    language: "English, Spanish",
+    phone: "+1 (555) 890-1234",
+    leadType: "Hot",
+    priority: "High",
+    timeframe: "4 weeks",
+    salesIntelScore: 8.5, 
+    conversionScore: 8.2, 
+    summary: "C-level executive seeking automation solutions for operational efficiency. Budget allocated for Q1 implementation.",
+    notes: "Very interested in automation platform. Has budget approval and decision-making authority. Wants proof of concept.",
+    voiceMemos: [
+      { id: 1, duration: "6:30", title: "Detailed requirements", timestamp: "9:45 AM" },
+      { id: 2, duration: "3:15", title: "Budget discussion", timestamp: "10:15 AM" }
+    ],
+    pictures: [
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=200&fit=crop"
+    ],
+    products: ["Enterprise Platform", "Automation Suite", "Integration Module"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T09:45:00Z",
+    capturedHour: "9 AM",
+    capturedBy: "Sarah Wilson",
+    capturedById: 2,
+    hasPhoto: true,
+    photoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+  },
+  { 
+    id: 9, 
+    name: "Amanda Foster", 
+    jobTitle: "Product Manager",
+    email: "amanda@cloudtech.io",
+    company: "CloudTech Solutions", 
+    industry: "Cloud Services",
+    companySize: "100-200 employees",
+    language: "English",
+    phone: "+1 (555) 901-2345",
+    leadType: "Warm",
+    priority: "Medium",
+    timeframe: "2 months",
+    salesIntelScore: 6.8, 
+    conversionScore: 6.5, 
+    summary: "Product manager evaluating integration options for new cloud platform. Needs detailed technical specifications.",
+    notes: "Looking for API integration capabilities. Timeline flexible but wants to move forward by end of Q2.",
+    voiceMemos: [
+      { id: 1, duration: "4:45", title: "Technical requirements", timestamp: "2:30 PM" }
+    ],
+    pictures: [
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=200&fit=crop"
+    ],
+    products: ["Integration Module", "API Gateway", "Developer Tools"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T14:30:00Z",
+    capturedHour: "2 PM",
+    capturedBy: "Lisa Rodriguez",
+    capturedById: 4,
+    hasPhoto: true,
+    photoUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+  },
+  { 
+    id: 10, 
+    name: "James Wilson", 
+    jobTitle: "Head of IT",
+    email: "james.w@nexusdata.com",
+    company: "Nexus Data Corp", 
+    industry: "Data Analytics",
+    companySize: "50-100 employees",
+    language: "English",
+    phone: "+1 (555) 012-3456",
+    leadType: "Info Only",
+    priority: "Low",
+    timeframe: "6+ months",
+    salesIntelScore: 4, 
+    conversionScore: 3, 
+    summary: "IT head in early research phase. No immediate budget but exploring future technology stack improvements.",
+    notes: "Collecting vendor information for potential future consideration. No immediate buying intent or budget.",
+    voiceMemos: [
+      { id: 1, duration: "2:00", title: "Brief overview", timestamp: "11:20 AM" }
+    ],
+    pictures: [],
+    products: ["Analytics Dashboard"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T11:20:00Z",
+    capturedHour: "11 AM",
+    capturedBy: "Mike Chen",
+    capturedById: 3,
+    hasPhoto: false
+  },
+  { 
+    id: 11, 
+    name: "Sophie Clark", 
+    jobTitle: "Business Development Manager",
+    email: "sophie@growthventure.com",
+    company: "GrowthVenture Inc", 
+    industry: "Business Services",
+    companySize: "20-50 employees",
+    language: "English, French",
+    phone: "+1 (555) 123-7890",
+    leadType: "Cold",
+    priority: "Low",
+    timeframe: "6+ months",
+    salesIntelScore: 5.2, 
+    conversionScore: 4.8, 
+    summary: "Business development manager exploring partnership opportunities. Long-term interest but no immediate need.",
+    notes: "Interested in potential partnership rather than direct purchase. Wants to explore collaboration opportunities.",
+    voiceMemos: [
+      { id: 1, duration: "3:30", title: "Partnership discussion", timestamp: "3:45 PM" }
+    ],
+    pictures: [
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=200&fit=crop"
+    ],
+    products: ["Business Intelligence", "Analytics Dashboard"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T15:45:00Z",
+    capturedHour: "3 PM",
+    capturedBy: "John Doe",
+    capturedById: 1,
+    hasPhoto: true,
+    photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face"
+  },
+  { 
+    id: 12, 
+    name: "Kevin Zhang", 
+    jobTitle: "Senior Developer",
+    email: "kevin@appforge.dev",
+    company: "AppForge Technologies", 
+    industry: "Software Development",
+    companySize: "30-50 employees",
+    language: "English, Mandarin",
+    phone: "+1 (555) 234-8901",
+    leadType: "Warm",
+    priority: "Medium",
+    timeframe: "Other (see notes)",
+    salesIntelScore: 7.5, 
+    conversionScore: 7.2, 
+    summary: "Senior developer evaluating tools for upcoming project. Technical decision maker with influence on purchasing decisions.",
+    notes: "Very technical discussion about API capabilities and integration options. Impressed with documentation and support.",
+    voiceMemos: [
+      { id: 1, duration: "5:45", title: "Technical deep dive", timestamp: "1:15 PM" },
+      { id: 2, duration: "2:30", title: "Integration questions", timestamp: "1:45 PM" }
+    ],
+    pictures: [
+      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1511578314322-379afb476865?w=300&h=200&fit=crop"
+    ],
+    products: ["Developer Tools", "API Gateway", "Integration Module"],
+    aiProcessed: true,
+    capturedAt: "2025-01-15T13:15:00Z",
+    capturedHour: "1 PM",
+    capturedBy: "Lisa Rodriguez",
+    capturedById: 4,
+    hasPhoto: true,
+    photoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+  }
+];
