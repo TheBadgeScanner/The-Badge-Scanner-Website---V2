@@ -538,6 +538,7 @@ export function AdminDashboard({
         currentPage="admin-dashboard"
         onNavigate={onNavigate}
         onLogout={onLogout}
+        hideMyDashboard={true}
       />
 
       <Breadcrumbs user={user} selectedOrganiser={selectedOrganiser} selectedEvent={selectedEvent} selectedCompany={selectedCompany} selectedUser={null} onNavigate={onNavigate} currentPage="admin-dashboard" />
