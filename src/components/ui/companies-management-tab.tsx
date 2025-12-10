@@ -1,5 +1,5 @@
 // File: components/ui/companies-management-tab.tsx
-import { Download, Plus, Edit, Search, Upload } from "lucide-react";
+import { Download, Plus, Edit, Search, Upload, FilterX, X } from "lucide-react";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader } from "./card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
@@ -7,7 +7,7 @@ import { Badge } from "./badge";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./pagination";
 import { Input } from "./input";
 import { useState } from "react";
-import { getScoreBadgeColor, getSortIcon } from "../utils/dashboardHelpers";
+import { getScoreBadgeColor, getSortIcon, getFilterDisplayName } from "../utils/dashboardHelpers";
 
 export function CompaniesManagementTab({ 
   companies = [],
@@ -20,7 +20,10 @@ export function CompaniesManagementTab({
   onExport,
   onAddCompany,
   onEditCompany,
-  onCompanyClick
+  onCompanyClick,
+  filters = {},
+  onClearFilters = () => {},
+  onRemoveFilter = () => {}
 }) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -53,7 +56,7 @@ export function CompaniesManagementTab({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           {/* LEFT: Buttons */}
           <div className="flex items-center gap-2">
             {onExport && (
@@ -72,6 +75,42 @@ export function CompaniesManagementTab({
               </Button>
             )}
           </div>
+
+          {/* CENTER: Active Filters */}
+          {Object.keys(filters || {}).length > 0 && (
+            <div
+              className="
+                flex items-center gap-2
+                min-w-0 flex-1
+                overflow-x-auto whitespace-nowrap
+                [-ms-overflow-style:'none'] [scrollbar-width:'none']
+                [&::-webkit-scrollbar]:hidden
+              "
+            >
+              {Object.entries(filters).map(([key, value]) => (
+                <Badge key={key} variant="secondary" className="inline-flex items-center gap-1">
+                  {getFilterDisplayName ? getFilterDisplayName(key, value) : `${key}: ${value}`}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-4 w-4 p-0 hover:bg-transparent"
+                    onClick={() => onRemoveFilter(key)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Clear Filters Button */}
+          {Object.keys(filters || {}).length > 0 && (
+            <Button variant="outline" size="sm" onClick={onClearFilters}
+              type="button">
+              <FilterX className="h-4 w-4 mr-2" />
+              Clear Filters
+            </Button>
+          )}
 
           {/* RIGHT: Search Box */}
           <div className="relative flex-shrink-0">
