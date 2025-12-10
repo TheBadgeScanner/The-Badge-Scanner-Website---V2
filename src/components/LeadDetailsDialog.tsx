@@ -44,12 +44,21 @@ export function LeadDetailsDialog({
                   <AvatarImage src={selectedLead.photoUrl} alt={selectedLead.name} />
                 )}
                 <AvatarFallback className="text-lg">
-                  {selectedLead.name.split(' ').map(n => n[0]).join('')}
+                  {selectedLead.name ? selectedLead.name.split(' ').map(n => n[0]).join('') : "?"}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-xl">{selectedLead.name}</h2>
-                <p className="text-muted-foreground">{selectedLead.company}</p>
+                {selectedLead.name ? (
+                  <>
+                    <h2 className="text-xl">{selectedLead.name}</h2>
+                    <p className="text-muted-foreground">{selectedLead.company}</p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-xl text-blue-600">Unmatched Scan</h2>
+                    <p className="text-muted-foreground font-mono text-sm">{selectedLead.badgeCode}</p>
+                  </>
+                )}
               </div>
             </div>
           </div>
