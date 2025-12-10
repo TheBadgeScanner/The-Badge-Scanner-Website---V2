@@ -218,12 +218,19 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
   };
 
   const handleInboxIssueClick = (eventId, issueType) => {
-    // Set filters for the event organiser dashboard
-    const filters = { [issueType]: true };
-    setInboxFilters(filters);
-    
-    // Navigate to event organiser dashboard with filters
-    onNavigate("event-organiser-dashboard", { filters });
+    const inboxItem = mockInboxData.find((item) => item.id === eventId);
+    const calendarEvent = inboxItem ? calendarEventByName[inboxItem.eventName] : null;
+
+    const event = calendarEvent || {
+      id: -1,
+      name: inboxItem?.eventName || "",
+      date: inboxItem?.eventDate || "",
+      location: "",
+      exhibitorCount: undefined,
+      visitorCount: undefined,
+    };
+
+    handleEventClick(event);
   };
 
   const clearInboxFilters = () => {
@@ -307,6 +314,38 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
       color: "purple"
     }
   ];
+
+  // Build quick lookup from event name to calendar event (if present)
+  const calendarEventByName = calendarEvents.reduce((acc, evt) => {
+    acc[evt.name] = evt;
+    return acc;
+  }, {} as Record<string, typeof calendarEvents[number]>);
+
+  // Derive issue entries (unmatched scans, inactive companies) with event info
+  const issueEntries = ["unmatched_scans", "inactive_companies"].map((type) => {
+    const firstMatch = mockInboxData.find((item) => item.issues.some((iss) => iss.type === type));
+    const issueMeta = mockPotentialIssues.find((p) => p.type === type);
+    const count = issueMeta?.count ?? 0;
+    const eventName = firstMatch?.eventName || "Unknown event";
+    const eventDate = firstMatch?.eventDate || "";
+    const calendarEvent = calendarEventByName[eventName];
+    const event = calendarEvent || {
+      id: -1,
+      name: eventName,
+      date: eventDate,
+      location: firstMatch?.organiser || "",
+      exhibitorCount: undefined,
+      visitorCount: undefined,
+    };
+    return {
+      type,
+      label: issueMeta?.label || type.replace("_", " "),
+      count,
+      event,
+      organiser: firstMatch?.organiser || null,
+      eventDate,
+    };
+  });
 
   // Get events for a specific date
   const getEventsForDate = (year, month, day) => {
@@ -557,11 +596,11 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                                 {day}
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent>
-                              <div className="space-y-1">
-                                <p className="font-semibold">{event.name}</p>
-                                <p className="text-xs">{event.date}</p>
-                                <p className="text-xs">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
+                            <TooltipContent className="p-3 text-sm leading-snug max-w-xs">
+                              <div className="space-y-1.5">
+                                <p className="font-semibold text-base">{event.name}</p>
+                                <p className="text-sm">{event.date}</p>
+                                <p className="text-sm">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
                               </div>
                             </TooltipContent>
                           </Tooltip>
@@ -603,11 +642,11 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                                       />
                                     </div>
                                   </TooltipTrigger>
-                                  <TooltipContent>
-                                    <div className="space-y-1">
-                                      <p className={`font-semibold ${colors.text}`}>{event.name}</p>
-                                      <p className="text-xs">{event.date}</p>
-                                      <p className="text-xs">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
+                                  <TooltipContent className="p-3 text-sm leading-snug max-w-xs">
+                                    <div className="space-y-1.5">
+                                      <p className={`font-semibold text-base ${colors.text}`}>{event.name}</p>
+                                      <p className="text-sm">{event.date}</p>
+                                      <p className="text-sm">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
                                     </div>
                                   </TooltipContent>
                                 </Tooltip>
@@ -709,27 +748,33 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
               {/* Right Column - Potential Issues */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                  <CardTitle className="font-bold">Potential Issues</CardTitle>
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <div className="flex items-center space-x-2">
+                    <CardTitle className="font-bold">Potential Issues</CardTitle>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <AlertTriangle className="h-5 w-5 text-red-600 cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>in the last 7 days</TooltipContent>
+                    </Tooltip>
+                  </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-full">
-                        <span className="text-lg font-bold">24</span>
+                <CardContent className="space-y-3">
+                  {issueEntries.map((issue) => (
+                    <div
+                      key={issue.type}
+                      className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                      onClick={() => handleEventClick(issue.event, issue.organiser)}
+                    >
+                      <div className="flex items-center justify-center w-12 h-12 bg-red-100 text-red-700 rounded flex-shrink-0">
+                        <span className="text-lg font-bold">{issue.count}</span>
                       </div>
-                      <span className="font-medium">unmatched scans</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-full">
-                        <span className="text-lg font-bold">6</span>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium truncate">{issue.label}</h4>
+                        <p className="text-sm text-muted-foreground truncate">{issue.event.name}</p>
+                        {issue.eventDate && <p className="text-xs text-muted-foreground truncate">{issue.eventDate}</p>}
                       </div>
-                      <span className="font-medium">inactive companies</span>
                     </div>
-                  </div>
+                  ))}
                 </CardContent>
               </Card>
             </div>
