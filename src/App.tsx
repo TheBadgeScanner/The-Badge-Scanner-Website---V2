@@ -242,7 +242,14 @@ function AppInner() {
 
     // Apply the payload updates FIRST, then clear what shouldn't persist
     if (navPayload.event !== undefined) {
-      setSelectedEvent(navPayload.event);
+      // Preserve filter, tab, scrollTo properties along with event
+      const eventWithMeta = {
+        ...navPayload.event,
+        filter: navPayload.filter,
+        tab: navPayload.tab,
+        scrollTo: navPayload.scrollTo
+      };
+      setSelectedEvent(eventWithMeta);
     }
 
     if (navPayload.organiser !== undefined) {
