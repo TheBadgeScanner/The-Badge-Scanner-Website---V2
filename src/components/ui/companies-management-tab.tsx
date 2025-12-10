@@ -1,5 +1,5 @@
 // File: components/ui/companies-management-tab.tsx
-import { Download, Plus, Edit, Search } from "lucide-react";
+import { Download, Plus, Edit, Search, Upload } from "lucide-react";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader } from "./card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
@@ -57,9 +57,12 @@ export function CompaniesManagementTab({
           {/* LEFT: Buttons */}
           <div className="flex items-center gap-2">
             {onExport && (
-              <Button variant="outline" size="sm" onClick={onExport}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
+              <Button 
+                size="sm" 
+                onClick={onExport}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import Companies
               </Button>
             )}
             {onAddCompany && (
