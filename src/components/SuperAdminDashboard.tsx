@@ -20,7 +20,7 @@ import { Label } from "./ui/label";
 const mockSystemMetrics = {
   totalEvents: 15,
   totalOrganisers: 8,
-  totalCompanies: 156,
+  totalExhibitors: 156,
   totalLeads: 12847,
   avgSalesIntelScore: 7.4,
   avgConversionScore: 6.9,
@@ -30,9 +30,11 @@ const mockSystemMetrics = {
 // Mock potential issues with counts
 const mockPotentialIssues = [
   { id: 1, type: "unmatched_scans", count: 23, label: "Unmatched Scans", severity: "medium" },
-  { id: 2, type: "inactive_companies", count: 5, label: "Inactive Companies", severity: "high" },
+  { id: 2, type: "inactive_Exhibitors", count: 5, label: "Inactive Exhibitors", severity: "high" },
   { id: 3, type: "failed_logins", count: 12, label: "Repeat Failed Logins", severity: "medium" },
-  { id: 4, type: "license_usage", count: 8, label: "Low License Usage", severity: "low" }
+  { id: 4, type: "license_usage", count: 8, label: "Low License Usage", severity: "low" },
+  { id: 5, type: "missing_data", count: 17, label: "Missing Contact Data", severity: "medium" },
+  { id: 6, type: "duplicate_entries", count: 9, label: "Duplicate Entries", severity: "low" }
 ];
 
 // Mock inbox data for events with issues
@@ -41,17 +43,17 @@ const mockInboxData = [
     id: 1,
     eventName: "Tech Conference 2025",
     eventDate: "Jan 22-24, 2025",
-    organiser: "Mike Wilson",
+    organiser: "Conference Badges Ltd.",
     issues: [
       { type: "unmatched_scans", count: 15, label: "Unmatched Scans" },
-      { type: "inactive_companies", count: 2, label: "Inactive Companies" }
+      { type: "inactive_Exhibitors", count: 2, label: "Inactive Exhibitors" }
     ]
   },
   {
     id: 2,
     eventName: "Healthcare Innovation Summit",
     eventDate: "Feb 15-17, 2025",
-    organiser: "Sarah Chen",
+    organiser: "MegaEvents Co",
     issues: [
       { type: "failed_logins", count: 8, label: "Repeat Failed Logins" },
       { type: "license_usage", count: 3, label: "Low License Usage" }
@@ -61,11 +63,80 @@ const mockInboxData = [
     id: 3,
     eventName: "FinTech World Expo",
     eventDate: "Mar 10-12, 2025",
-    organiser: "David Rodriguez",
+    organiser: "EventPro Management",
     issues: [
       { type: "unmatched_scans", count: 8, label: "Unmatched Scans" },
       { type: "failed_logins", count: 4, label: "Repeat Failed Logins" }
     ]
+  },
+  {
+    id: 4,
+    eventName: "Innovation Summit",
+    eventDate: "Jan 24-26, 2025",
+    organiser: "City Events Ltd",
+    issues: [
+      { type: "missing_data", count: 11, label: "Missing Contact Data" },
+      { type: "duplicate_entries", count: 6, label: "Duplicate Entries" }
+    ]
+  },
+  {
+    id: 5,
+    eventName: "Digital Expo",
+    eventDate: "Jan 26-28, 2025",
+    organiser: "TradeShow Organization",
+    issues: [
+      { type: "missing_data", count: 6, label: "Missing Contact Data" },
+      { type: "duplicate_entries", count: 3, label: "Duplicate Entries" }
+    ]
+  }
+];
+
+// Mock recently completed events data
+const mockRecentlyCompletedEvents = [
+  {
+    id: 1,
+    name: "AI & Machine Learning Summit 2024",
+    date: "December 8-10, 2024",
+    exhibitorCount: 52,
+    visitorCount: 1450,
+    leadCount: 533,
+    organiser: "EventPro Management"
+  },
+  {
+    id: 2,
+    name: "Sustainable Business Conference",
+    date: "December 5-7, 2024",
+    exhibitorCount: 38,
+    visitorCount: 950,
+    leadCount: 1238,
+    organiser: "Event Management Co"
+  },
+  {
+    id: 3,
+    name: "Cybersecurity Summit 2024",
+    date: "November 29 - Dec 1, 2024",
+    exhibitorCount: 11,
+    visitorCount: 680,
+    leadCount: 842,
+    organiser: "MegaEvents Co"
+  },
+  {
+    id: 7,
+    name: "Cloud Computing Expo 2024",
+    date: "November 20-22, 2024",
+    exhibitorCount: 44,
+    visitorCount: 1120,
+    leadCount: 678,
+    organiser: "EventPro Management"
+  },
+  {
+    id: 8,
+    name: "Digital Marketing Summit",
+    date: "November 15-17, 2024",
+    exhibitorCount: 29,
+    visitorCount: 780,
+    leadCount: 456,
+    organiser: "Event Management Co"
   }
 ];
 
@@ -97,7 +168,7 @@ const mockEventOrganisers = [
   },
   {
     id: 4,
-    name: "Conference Badges L",
+    name: "Conference Badges Ltd.",
     supportEmail: "support@conferencebadges.com",
     description: "Specializing in conference badge solutions and attendee management",
     eventsManaged: 4,
@@ -228,6 +299,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
       location: "",
       exhibitorCount: undefined,
       visitorCount: undefined,
+      leadCount: undefined
     };
 
     handleEventClick(event);
@@ -321,8 +393,8 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
     return acc;
   }, {} as Record<string, typeof calendarEvents[number]>);
 
-  // Derive issue entries (unmatched scans, inactive companies) with event info
-  const issueEntries = ["unmatched_scans", "inactive_companies"].map((type) => {
+  // Derive issue entries (all issue types) with event info
+  const issueEntries = ["unmatched_scans", "inactive_Exhibitors", "failed_logins", "license_usage", "missing_data", "duplicate_entries"].map((type) => {
     const firstMatch = mockInboxData.find((item) => item.issues.some((iss) => iss.type === type));
     const issueMeta = mockPotentialIssues.find((p) => p.type === type);
     const count = issueMeta?.count ?? 0;
@@ -447,7 +519,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                       <div className="text-base sm:text-lg lg:text-xl font-semibold text-muted-foreground whitespace-nowrap">Total Exhibitors</div>
                       {/* Number size: text-xl (small), text-2xl (medium), text-3xl (large) */}
                       <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600 leading-tight">
-                        <AnimatedCounter value={mockSystemMetrics.totalCompanies} duration={1500} />
+                        <AnimatedCounter value={mockSystemMetrics.totalExhibitors} duration={1500} />
                       </div>
                     </div>
                   </CardContent>
@@ -662,15 +734,22 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
               </Card>
             </div>
 
-            {/* Upcoming Events & Potential Issues */}
-            <div className="grid gap-6 md:grid-cols-2">
+            {/* Upcoming Events & Potential Issues & Recently Completed Events */}
+            <div className="grid gap-6 md:grid-cols-3">
               {/* Left Column - Upcoming Events */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                  <CardTitle className="font-bold">Upcoming Events</CardTitle>
-                  <Calendar className="h-5 w-5 text-blue-600" />
+              <Card className="flex flex-col gap-3 h-[320px]">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <div className="flex items-center space-x-2">
+                    <CardTitle className="font-bold">Upcoming Events</CardTitle>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Calendar className="h-5 w-5 text-blue-600 cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>in the next 7 days</TooltipContent>
+                    </Tooltip>
+                  </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="flex-1 overflow-y-auto px-6 pb-6 space-y-4" style={{ scrollbarWidth: 'thin' }}>
                   <div 
                     className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
                     onClick={() => handleEventClick(
@@ -691,7 +770,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium truncate">Tech Conference 2025</h4>
-                      <p className="text-sm text-muted-foreground truncate">EventPro Management • 45 companies</p>
+                      <p className="text-sm text-muted-foreground truncate">EventPro Management • 45 Exhibitors</p>
                     </div>
                   </div>
 
@@ -715,7 +794,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium truncate">Innovation Summit</h4>
-                      <p className="text-sm text-muted-foreground truncate">City Events Ltd • 32 companies</p>
+                      <p className="text-sm text-muted-foreground truncate">City Events Ltd • 32 Exhibitors</p>
                     </div>
                   </div>
 
@@ -739,15 +818,15 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium truncate">Digital Expo</h4>
-                      <p className="text-sm text-muted-foreground truncate">TradeShow Organization • 28 companies</p>
+                      <p className="text-sm text-muted-foreground truncate">TradeShow Organization • 28 Exhibitors</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Right Column - Potential Issues */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              {/* Middle Column - Potential Issues */}
+              <Card className="flex flex-col gap-3 h-[320px]">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <div className="flex items-center space-x-2">
                     <CardTitle className="font-bold">Potential Issues</CardTitle>
                     <Tooltip>
@@ -758,7 +837,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                     </Tooltip>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="flex-1 overflow-y-auto px-6 pb-6 space-y-3" style={{ scrollbarWidth: 'thin' }}>
                   {issueEntries.map((issue) => (
                     <div
                       key={issue.type}
@@ -775,6 +854,146 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                       </div>
                     </div>
                   ))}
+                </CardContent>
+              </Card>
+
+              {/* Right Column - Recently Completed Events */}
+              <Card className="flex flex-col gap-3 h-[320px]">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <div className="flex items-center space-x-2">
+                    <CardTitle className="font-bold">Recently Completed Events</CardTitle>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CheckCircle className="h-5 w-5 text-green-600 cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>in the last 7 days</TooltipContent>
+                    </Tooltip>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1 overflow-y-auto px-6 pb-6 space-y-4" style={{ scrollbarWidth: 'thin' }}>
+                  <div 
+                    className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => handleEventClick(
+                      {
+                        id: 4,
+                        name: "AI & Machine Learning Summit 2024",
+                        date: "December 8-10, 2024",
+                        location: "San Jose Convention Center",
+                        exhibitorCount: 52,
+                        visitorCount: 1450,
+                        leadCount: 533
+                      },
+                      organisers[1]
+                    )}
+                  >
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                      <span className="text-xs">Dec</span>
+                      <span className="font-bold">8-10</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">AI & Machine Learning Summit 2024</h4>
+                      <p className="text-sm text-muted-foreground truncate">EventPro Management • 52 Exhibitors • 152 Leads</p>
+                    </div>
+                  </div>
+
+                  <div 
+                    className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => handleEventClick(
+                      {
+                        id: 5,
+                        name: "Sustainable Business Conference",
+                        date: "December 5-7, 2024",
+                        location: "Austin Convention Center",
+                        exhibitorCount: 38,
+                        visitorCount: 950
+                      },
+                      organisers[0]
+                    )}
+                  >
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                      <span className="text-xs">Dec</span>
+                      <span className="font-bold">5-7</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">Sustainable Business Conference</h4>
+                      <p className="text-sm text-muted-foreground truncate">Event Management Co • 38 Exhibitors • 78 Leads</p>
+                    </div>
+                  </div>
+
+                  <div 
+                    className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => handleEventClick(
+                      {
+                        id: 6,
+                        name: "Cybersecurity Summit 2024",
+                        date: "November 29 - Dec 1, 2024",
+                        location: "Denver Convention Center",
+                        exhibitorCount: 11,
+                        visitorCount: 680,
+                        leadCount: 842
+                      },
+                      organisers[2]
+                    )}
+                  >
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                      <span className="text-xs">Nov</span>
+                      <span className="font-bold">29-1</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">Cybersecurity Summit 2024</h4>
+                      <p className="text-sm text-muted-foreground truncate">MegaEvents Co • 11 Exhibitors • 842 Leads</p>
+                    </div>
+                  </div>
+
+                  <div 
+                    className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => handleEventClick(
+                      {
+                        id: 7,
+                        name: "Cloud Computing Expo 2024",
+                        date: "November 20-22, 2024",
+                        location: "Seattle Convention Center",
+                        exhibitorCount: 44,
+                        visitorCount: 1120,
+                        leadCount: 678
+                      },
+                      organisers[1]
+                    )}
+                  >
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                      <span className="text-xs">Nov</span>
+                      <span className="font-bold">20-22</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">Cloud Computing Expo 2024</h4>
+                      <p className="text-sm text-muted-foreground truncate">EventPro Management • 44 Exhibitors • 678 Leads</p>
+                    </div>
+                  </div>
+
+                  <div 
+                    className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => handleEventClick(
+                      {
+                        id: 8,
+                        name: "Digital Marketing Summit",
+                        date: "November 15-17, 2024",
+                        location: "Boston Convention Center",
+                        exhibitorCount: 29,
+                        visitorCount: 780,
+                        leadCount: 456
+                      },
+                      organisers[0]
+                    )}
+                  >
+                    <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                      <span className="text-xs">Nov</span>
+                      <span className="font-bold">15-17</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">Digital Marketing Summit</h4>
+                      <p className="text-sm text-muted-foreground truncate">Event Management Co • 29 Exhibitors • 456 Leads</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -942,7 +1161,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                 <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                   <span>{event.exhibitorCount} exhibitors</span>
                   <span>•</span>
-                  <span>{event.visitorCount.toLocaleString()} visitors</span>
+                  <span>{event.visitorCount.toLocaleString()}.{event.leadCount.toLocaleString()} visitors</span>
                 </div>
               </div>
             ))}
