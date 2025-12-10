@@ -12,6 +12,11 @@ export function Breadcrumbs({ user, selectedOrganiser, selectedEvent, selectedCo
     onNavigate && onNavigate("events", { organiser: selectedOrganiser });
   };
 
+  const handleEventsClick = () => {
+    // Navigate to EventSelectionPage for User/Admin roles
+    onNavigate && onNavigate("events", { organiser: selectedOrganiser });
+  };
+
   const handleEventClick = () => {
     if (!selectedEvent) return;
     // For User/Admin, navigate to EventSelectionPage
@@ -270,8 +275,8 @@ export function Breadcrumbs({ user, selectedOrganiser, selectedEvent, selectedCo
   }
 
   // =====================================================
-  // User: {EventName} > {CompanyName} > {Firstname Lastname}
-  // Only {EventName} is clickable
+  // User: Events / {EventName} / {CompanyName} / {Firstname Lastname}
+  // {Events} and {EventName} are clickable
   // =====================================================
   if (user?.role === "User") {
     const eventLabel = selectedEvent?.name || "{EventName}";
@@ -282,6 +287,10 @@ export function Breadcrumbs({ user, selectedOrganiser, selectedEvent, selectedCo
       <div className="fixed top-16 left-0 right-0 z-40 bg-page-background pointer-events-auto">
         <div className="container mx-auto px-6 py-2">
           <nav className="text-sm text-muted-foreground flex items-center space-x-2">
+            <button onClick={handleEventsClick} className="hover:underline text-primary">
+              Events
+            </button>
+            <span>/</span>
             {selectedEvent ? (
               <button onClick={handleEventClick} className="hover:underline text-primary">
                 {eventLabel}
@@ -300,19 +309,24 @@ export function Breadcrumbs({ user, selectedOrganiser, selectedEvent, selectedCo
   }
 
   // =====================================================
-  // Admin: {EventName} > {CompanyName}
-  // Only {EventName} is clickable
-  // When viewing a user, add: {EventName} > {CompanyName} > {Firstname Lastname}
+  // Admin: Events / {EventName} / {CompanyName} / {UserName}
+  // {Events} and {EventName} are clickable
   // =====================================================
   if (user?.role === "Admin") {
     const eventLabel = selectedEvent?.name || "{EventName}";
     const companyLabel = selectedCompany?.name || "{CompanyName}";
-    const userLabel = selectedUser?.name || "{Firstname Lastname}";
+    const userLabel = selectedUser?.firstName && selectedUser?.lastName
+      ? `${selectedUser.firstName} ${selectedUser.lastName}`
+      : selectedUser?.name || selectedUser || "{Firstname Lastname}";
 
     return (
-      <div className="fixed top-16 left-0 right-0 z-40 bg-page-background  pointer-events-auto ">
+      <div className="fixed top-16 left-0 right-0 z-40 bg-page-background pointer-events-auto">
         <div className="container mx-auto px-6 py-2">
           <nav className="text-sm text-muted-foreground flex items-center space-x-2">
+            <button onClick={handleEventsClick} className="hover:underline text-primary">
+              Events
+            </button>
+            <span>/</span>
             {selectedEvent ? (
               <button onClick={handleEventClick} className="hover:underline text-primary">
                 {eventLabel}
