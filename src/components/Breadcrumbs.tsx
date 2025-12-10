@@ -335,7 +335,13 @@ export function Breadcrumbs({ user, selectedOrganiser, selectedEvent, selectedCo
               <span className="text-muted-foreground">{eventLabel}</span>
             )}
             <span>/</span>
-            <span className="text-muted-foreground">{companyLabel}</span>
+            {selectedCompany ? (
+              <button onClick={handleCompanyClick} className="hover:underline text-primary">
+                {companyLabel}
+              </button>
+            ) : (
+              <span className="text-muted-foreground">{companyLabel}</span>
+            )}
             {selectedUser && (
               <>
                 <span>/</span>
