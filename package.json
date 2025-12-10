@@ -54,6 +54,6 @@
       "scripts": {
           "dev": "vite",
           "build": "vite build",
-          "deploy": "powershell -ExecutionPolicy Bypass -File ./deploy-pages.ps1"
+          "deploy": "powershell -ExecutionPolicy Bypass -File ./deploy-website.ps1"
       }
   }
