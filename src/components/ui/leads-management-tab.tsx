@@ -328,11 +328,20 @@ export function LeadsManagementTab({
                         {lead.hasPhoto ? (
                           <AvatarImage src={lead.photoUrl} />
                         ) : null}
-                        <AvatarFallback>{lead.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>{lead.name ? lead.name.charAt(0) : "?"}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{lead.name}</p>
-                        <p className="text-sm text-muted-foreground">{lead.jobTitle}</p>
+                        {lead.name ? (
+                          <>
+                            <p className="font-medium">{lead.name}</p>
+                            <p className="text-sm text-muted-foreground">{lead.jobTitle}</p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="font-medium text-blue-600">Badge Code</p>
+                            <p className="text-sm text-muted-foreground">{lead.badgeCode}</p>
+                          </>
+                        )}
                       </div>
                     </div>
                   </TableCell>
