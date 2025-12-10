@@ -1,5 +1,5 @@
 // File: components/EventAdminDashboard.tsx
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Navigation } from "./Navigation";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { DeveloperLabel } from "./DeveloperLabel";
@@ -271,6 +271,22 @@ const mockCompanies = [
     useAI: false,
     sendOnboardingEmail: false,
   },
+  // Inactive Exhibitor for demo - company with 0 active users
+  {
+    id: 9,
+    companyName: "Horizon Ventures",
+    contactFirstName: "Patricia",
+    contactLastName: "Johnson",
+    contactEmail: "patricia.johnson@horizonventures.com",
+    leadsCapured: 28,
+    avgSalesIntelScore: 6.1,
+    avgConversionScore: 5.5,
+    licensesActive: 0,
+    licensesAssigned: 5,
+    licensesAvailable: 5,
+    useAI: true,
+    sendOnboardingEmail: false,
+  },
 ];
 
 // Mock visitors data
@@ -437,6 +453,9 @@ export function EventAdminDashboard({
 
   // Ref for leads section scrolling
   const leadsTabRef = useRef(null);
+  
+  // Ref for companies section scrolling
+  const companiesTabRef = useRef(null);
 
   // Pagination states
   const [companiesCurrentPage, setCompaniesCurrentPage] =
@@ -453,6 +472,59 @@ export function EventAdminDashboard({
   const [leadsSearchQuery, setLeadsSearchQuery] = useState("");
 
   const itemsPerPage = 5;
+  
+  // Handle incoming filter params from navigation
+  useEffect(() => {
+    // Check if selectedEvent has filter or tab data in its properties
+    if (selectedEvent) {
+      const filterInfo = selectedEvent.filter;
+      
+      if (filterInfo) {
+        if (filterInfo.type === "unmatchedScans") {
+          setActiveTab("leads");
+          setLeadFilters({ unmatchedScans: true });
+        } else if (filterInfo.type === "noEmail") {
+          setActiveTab("leads");
+          setLeadFilters({ noEmail: true });
+        } else if (filterInfo.type === "inactiveExhibitors") {
+          setActiveTab("companies");
+          setLeadFilters({ inactiveExhibitors: true });
+        }
+        
+        // Scroll to Event Management section after a delay to let state update
+        setTimeout(() => {
+          // Try multiple approaches to find and scroll to the Event Management section
+          let element = leadsTabRef.current;
+          console.log("Ref element:", element);
+          
+          if (!element) {
+            // Fallback: search for the Event Management card by title
+            const cards = document.querySelectorAll('[class*="Card"]');
+            for (let card of cards) {
+              if (card.textContent.includes("Event Management")) {
+                element = card;
+                console.log("Found Event Management card by search");
+                break;
+              }
+            }
+          }
+          
+          if (element) {
+            console.log("Scrolling to element");
+            const rect = element.getBoundingClientRect();
+            const absoluteTop = window.scrollY + rect.top;
+            window.scrollTo({
+              top: Math.max(0, absoluteTop - 150),
+              behavior: "smooth"
+            });
+          } else {
+            console.log("Could not find Event Management element");
+          }
+        }, 400);
+      }
+    }
+  }, [selectedEvent]);
+
 
   // Get event-specific leads based on selectedEvent
   const getEventLeads = () => {
@@ -508,13 +580,21 @@ export function EventAdminDashboard({
     }
   };
 
-  const sortedCompanies = [...mockCompanies].sort((a, b) => {
-    const aVal = a[companySortBy] || 0;
-    const bVal = b[companySortBy] || 0;
-    return companySortOrder === "desc"
-      ? bVal - aVal
-      : aVal - bVal;
-  });
+  const sortedCompanies = [...mockCompanies]
+    .filter((company) => {
+      // Apply inactiveExhibitors filter
+      if (leadFilters.inactiveExhibitors) {
+        return company.licensesActive === 0;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const aVal = a[companySortBy] || 0;
+      const bVal = b[companySortBy] || 0;
+      return companySortOrder === "desc"
+        ? bVal - aVal
+        : aVal - bVal;
+    });
 
   const sortedVisitors = [...mockVisitors].sort((a, b) => {
     let aVal, bVal;
@@ -578,6 +658,36 @@ export function EventAdminDashboard({
           (lead) => lead.capturedHour === targetHour,
         );
       }
+    }
+    
+    // Apply unmatchedScans filter - leads with badgeCode (scanned QR code that didn't match visitor)
+    // Only show if name, email, company, jobTitle, and phone are all empty
+    if (leadFilters.unmatchedScans) {
+      filteredLeads = filteredLeads.filter(
+        (lead) => 
+          (!lead.name || lead.name === "") &&
+          (!lead.email || lead.email === "") &&
+          (!lead.company || lead.company === "") &&
+          (!lead.jobTitle || lead.jobTitle === "") &&
+          (!lead.phone || lead.phone === "") &&
+          lead.badgeCode && 
+          lead.badgeCode !== null && 
+          lead.badgeCode !== ""
+      );
+    }
+
+    // Apply noEmail filter (for Missing Contact Data)
+    if (leadFilters.noEmail) {
+      filteredLeads = filteredLeads.filter(
+        (lead) => !lead.email || lead.email === "" || lead.email === null,
+      );
+    }
+
+    // Apply missingContactData filter (for Missing Contact Data)
+    if (leadFilters.missingContactData) {
+      filteredLeads = filteredLeads.filter(
+        (lead) => !lead.email || lead.email === "" || lead.email === null,
+      );
     }
 
     return filteredLeads;
@@ -993,6 +1103,7 @@ export function EventAdminDashboard({
         currentPage="event-admin-dashboard"
         onNavigate={onNavigate}
         onLogout={onLogout}
+        hideMyDashboard={true}
       />
 
       <Breadcrumbs
@@ -1424,13 +1535,15 @@ export function EventAdminDashboard({
 
           {/* Tabbed Section for Companies, Visitors, and Leads */}
           <EventManagementPanel
+            leadsTabRef={leadsTabRef}
+            companiesTabRef={companiesTabRef}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             leadFilters={leadFilters}
             clearFilters={clearFilters}
             removeFilter={removeFilter}
-            companies={mockCompanies}
-            visitors={mockVisitors}
+            companies={sortedCompanies}
+            visitors={sortedVisitors}
             filteredLeads={filteredLeads}
             companySortBy={companySortBy}
             companySortOrder={companySortOrder}
@@ -1553,7 +1666,7 @@ export function EventAdminDashboard({
                   onCheckedChange={setSendOnboardingEmail}
                 />
                 <Label htmlFor="send-onboarding-email">
-                  Send Onboarding Emails
+                  Send Onboarding Email
                 </Label>
               </div>
             </div>
