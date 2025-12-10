@@ -202,7 +202,15 @@ export function LeadsManagementTab({
 
       {/* (Optional) Export button — sits between left badges and the right cluster */}
       {filteredLeads && handleExportToExcel && (
-        <Button onClick={handleExportToExcel} className="flex items-center gap-2" data-tour="export-excel">
+        <Button 
+          variant="blue" 
+          onClick={handleExportToExcel} 
+          className="flex items-center gap-2" 
+          data-tour="export-excel"
+          style={{ backgroundColor: '#2563eb', color: 'white', borderColor: '#2563eb' }}
+          onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+          onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = '#2563eb'}
+        >
           <Download className="h-4 w-4" />
           Export to Excel
         </Button>
