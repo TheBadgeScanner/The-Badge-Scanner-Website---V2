@@ -46,12 +46,6 @@ const getNavItems = (role, currentPage) => {
       page: "event-organiser-dashboard",
       active: currentPage === "event-organiser-dashboard",
     });
-    items.push({
-      icon: Calendar,
-      label: "Change Event",
-      page: "events",
-      active: currentPage === "events",
-    });
   } else if (role === "Event Admin") {
     items.push({
       icon: Building2,
@@ -97,8 +91,8 @@ export function Navigation({ user, currentPage, onNavigate, onLogout, hideMyDash
   const { selectedEvent, selectedOrganiser, selectedCompany, selectedUser } = useSelectedScope();
   const navItems = getNavItems(user?.role, currentPage);
   
-  // Filter out "My Dashboard" if hideMyDashboard is true
-  const filteredNavItems = hideMyDashboard 
+  // Filter out "My Dashboard" if hideMyDashboard is true OR if user role is not "User"
+  const filteredNavItems = (hideMyDashboard || user?.role !== "User")
     ? navItems.filter(item => item.label !== "My Dashboard")
     : navItems;
 
