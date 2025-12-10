@@ -70,7 +70,14 @@ export function VisitorsManagementTab({
           {/* LEFT: Buttons */}
           <div className="flex items-center gap-2">
             {onExport && (
-              <Button variant="outline" size="sm" onClick={onExport}>
+              <Button 
+                variant="blue" 
+                size="sm" 
+                onClick={onExport}
+                style={{ backgroundColor: '#2563eb', color: 'white', borderColor: '#2563eb' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = '#2563eb'}
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
