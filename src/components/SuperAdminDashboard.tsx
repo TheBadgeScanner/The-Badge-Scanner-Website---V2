@@ -15,6 +15,7 @@ import { AnimatedCounter } from "./ui/animated-counter";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
 
 // Mock system-wide data
 const mockSystemMetrics = {
@@ -187,7 +188,10 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
   const [formData, setFormData] = useState({
     name: "",
     supportEmail: "",
-    description: ""
+    description: "",
+    firstName: "",
+    lastName: "",
+    sendInvite: true,
   });
 
   // Get context values for breadcrumbs
@@ -233,7 +237,10 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
     setFormData({
       name: organiser.name,
       supportEmail: organiser.supportEmail,
-      description: organiser.description
+      description: organiser.description,
+      firstName: organiser.firstName || "",
+      lastName: organiser.lastName || "",
+      sendInvite: organiser.sendInvite ?? true,
     });
     setIsOrganiserDialogOpen(true);
   };
@@ -243,7 +250,10 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
     setFormData({
       name: "",
       supportEmail: "",
-      description: ""
+      description: "",
+      firstName: "",
+      lastName: "",
+      sendInvite: true,
     });
     setIsOrganiserDialogOpen(true);
   };
@@ -258,7 +268,15 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
       // Update existing organiser
       setOrganisers(organisers.map(org => 
         org.id === editingOrganiser.id 
-          ? { ...org, name: formData.name, supportEmail: formData.supportEmail, description: formData.description }
+          ? { 
+              ...org, 
+              name: formData.name, 
+              supportEmail: formData.supportEmail, 
+              description: formData.description,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              sendInvite: formData.sendInvite,
+            }
           : org
       ));
     } else {
@@ -268,6 +286,9 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
         name: formData.name,
         supportEmail: formData.supportEmail,
         description: formData.description,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        sendInvite: formData.sendInvite,
         eventsManaged: 0,
         status: "active"
       };
@@ -275,7 +296,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
     }
     
     setIsOrganiserDialogOpen(false);
-    setFormData({ name: "", supportEmail: "", description: "" });
+    setFormData({ name: "", supportEmail: "", description: "", firstName: "", lastName: "", sendInvite: true });
   };
 
   const handleOrganiserClick = (organiser) => {
@@ -302,7 +323,26 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
       leadCount: undefined
     };
 
-    handleEventClick(event);
+    // Determine navigation parameters based on issue type
+    let navigationParams: any = { event };
+    
+    if (issueType === "unmatched_scans") {
+      // Navigate to Event Admin Dashboard with Leads tab open and filter for unmatched scans (has badgeCode)
+      navigationParams.tab = "leads";
+      navigationParams.filter = { type: "unmatchedScans" };
+    } else if (issueType === "inactive_Exhibitors") {
+      // Navigate to Event Admin Dashboard with Companies tab open and filter for inactive
+      navigationParams.tab = "companies";
+      navigationParams.filter = { type: "inactiveExhibitors" };
+      navigationParams.scrollTo = "companies";
+    } else if (issueType === "missing_data") {
+      // Navigate to Event Admin Dashboard with Leads tab open and filter for leads without email
+      navigationParams.tab = "leads";
+      navigationParams.filter = { type: "noEmail" };
+    }
+
+    window.scrollTo({ top: 0, behavior: "instant" });
+    onNavigate("event-admin-dashboard", navigationParams);
   };
 
   const clearInboxFilters = () => {
@@ -668,10 +708,9 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                                 {day}
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent className="p-3 text-sm leading-snug max-w-xs">
+                            <TooltipContent className="p-3 text-sm leading-snug max-w-xs cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleEventClick(event)}>
                               <div className="space-y-1.5">
                                 <p className="font-semibold text-base">{event.name}</p>
-                                <p className="text-sm">{event.date}</p>
                                 <p className="text-sm">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
                               </div>
                             </TooltipContent>
@@ -679,54 +718,51 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                         );
                       }
 
-                      // Multiple events (2 or more) - show split color view (vertical split - side by side)
-                      // On hover, the entire cell fills with the hovered event's color
+                      // Multiple events (2 or more) - show split color view with clickable list tooltip
                       return (
-                        <div 
-                          key={day}
-                          className={`aspect-square text-[10px] relative rounded overflow-hidden border ${
-                            isToday ? 'ring-1 ring-primary ring-offset-1 border-primary' : 'border-gray-300'
-                          }`}
-                        >
-                          <div className="absolute inset-0 flex">
-                            {events.map((event, idx) => {
-                              const colors = colorMap[event.color as keyof typeof colorMap] || colorMap.blue;
-                              const isFirst = idx === 0;
-                              
-                              return (
-                                <Tooltip key={event.id}>
-                                  <TooltipTrigger asChild>
+                        <Tooltip key={day}>
+                          <TooltipTrigger asChild>
+                            <div 
+                              className={`aspect-square text-[10px] relative rounded overflow-hidden border cursor-pointer ${
+                                isToday ? 'ring-1 ring-primary ring-offset-1 border-primary' : 'border-gray-300'
+                              }`}
+                            >
+                              <div className="absolute inset-0 flex">
+                                {events.map((event, idx) => {
+                                  const colors = colorMap[event.color as keyof typeof colorMap] || colorMap.blue;
+                                  const isFirst = idx === 0;
+                                  
+                                  return (
                                     <div 
-                                      className={`flex-1 ${colors.bg} flex items-center justify-center cursor-pointer relative group ${
+                                      key={event.id}
+                                      className={`flex-1 ${colors.bg} flex items-center justify-center relative group ${
                                         isFirst ? '' : 'border-l'
-                                      } ${colors.border}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleEventClick(event);
-                                      }}
-                                    >
-                                      {/* Hover overlay that fills the entire cell with smooth transition */}
-                                      <div 
-                                        className={`absolute inset-0 ${colors.bg} opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out`}
-                                        style={{ 
-                                          zIndex: 5
-                                        }} 
-                                      />
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="p-3 text-sm leading-snug max-w-xs">
-                                    <div className="space-y-1.5">
-                                      <p className={`font-semibold text-base ${colors.text}`}>{event.name}</p>
-                                      <p className="text-sm">{event.date}</p>
-                                      <p className="text-sm">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              );
-                            })}
-                          </div>
-                          <span className="absolute inset-0 flex items-center justify-center z-10 font-semibold pointer-events-none">{day}</span>
-                        </div>
+                                      } ${colors.border} hover:opacity-80 transition-opacity`}
+                                    />
+                                  );
+                                })}
+                              </div>
+                              <span className="absolute inset-0 flex items-center justify-center z-10 font-semibold pointer-events-none">{day}</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="p-3 text-sm leading-snug max-w-xs w-auto">
+                            <div className="space-y-2">
+                              {events.map((event) => {
+                                const colors = colorMap[event.color as keyof typeof colorMap] || colorMap.blue;
+                                return (
+                                  <div 
+                                    key={event.id}
+                                    className={`p-2 rounded cursor-pointer hover:bg-muted/70 transition-colors ${colors.bg} ${colors.text}`}
+                                    onClick={() => handleEventClick(event)}
+                                  >
+                                    <p className="font-semibold text-sm">{event.name}</p>
+                                    <p className="text-xs mt-1">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
                       );
                     })}
                   </div>
@@ -745,7 +781,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                       <TooltipTrigger asChild>
                         <Calendar className="h-5 w-5 text-blue-600 cursor-pointer" />
                       </TooltipTrigger>
-                      <TooltipContent>in the next 7 days</TooltipContent>
+                      <TooltipContent className="text-base p-3">in the next 7 days</TooltipContent>
                     </Tooltip>
                   </div>
                 </CardHeader>
@@ -833,7 +869,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                       <TooltipTrigger asChild>
                         <AlertTriangle className="h-5 w-5 text-red-600 cursor-pointer" />
                       </TooltipTrigger>
-                      <TooltipContent>in the last 7 days</TooltipContent>
+                      <TooltipContent className="text-base p-3">in the last 7 days</TooltipContent>
                     </Tooltip>
                   </div>
                 </CardHeader>
@@ -866,7 +902,7 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                       <TooltipTrigger asChild>
                         <CheckCircle className="h-5 w-5 text-green-600 cursor-pointer" />
                       </TooltipTrigger>
-                      <TooltipContent>in the last 7 days</TooltipContent>
+                      <TooltipContent className="text-base p-3">in the last 7 days</TooltipContent>
                     </Tooltip>
                   </div>
                 </CardHeader>
@@ -1090,22 +1126,41 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
           <DialogHeader>
             <DialogTitle>{editingOrganiser ? "Edit Event Organiser" : "Add New Event Organiser"}</DialogTitle>
             <DialogDescription>
-              {editingOrganiser ? "Update event organiser information" : "Add a new event organiser to the system"}
+              {editingOrganiser ? "Update event organiser information" : ""}
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="space-y-6">
-            <div className="space-y-2">
+
+          <div className="space-y-2">
               <Label>Event Organiser Name</Label>
               <Input 
                 placeholder="Enter event organiser name" 
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
               />
+          </div>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>First Name</Label>
+                <Input 
+                  placeholder="Enter first name" 
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Last Name</Label>
+                <Input 
+                  placeholder="Enter last name" 
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Support Email</Label>
+              <Label>Email</Label>
               <Input 
                 type="email"
                 placeholder="support@organiser.com" 
@@ -1121,6 +1176,18 @@ export function SuperAdminDashboard({ user, selectedEvent, onLogout, onNavigate,
                 placeholder="Enter a description for this event organiser" 
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <div className="space-y-1">
+                <Label htmlFor="send-invite-toggle">Send Invitation Email</Label>
+                <p className="text-sm text-muted-foreground">Send an invite to the organiser contact.</p>
+              </div>
+              <Switch
+                id="send-invite-toggle"
+                checked={formData.sendInvite}
+                onCheckedChange={(checked) => setFormData({...formData, sendInvite: checked})}
               />
             </div>
 
