@@ -283,7 +283,7 @@ const mockVisitors = [
     company: "ABC Corp",
     jobTitle: "VP of Sales",
     phone: "+1-555-0123",
-    imported: "2025-01-15T10:30:00Z",
+    imported: "15/01/2025 10:30:00",
     avatar:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
   },
@@ -295,7 +295,7 @@ const mockVisitors = [
     company: "TechStart Inc",
     jobTitle: "Marketing Director",
     phone: "+1-555-0456",
-    imported: "2025-01-15T10:30:00Z",
+    imported: "15/01/2025 10:30:00",
     avatar:
       "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
   },
@@ -307,7 +307,7 @@ const mockVisitors = [
     company: "GlobalTech Solutions",
     jobTitle: "CTO",
     phone: "+1-555-0789",
-    imported: "2025-01-15T10:30:00Z",
+    imported: "15/01/2025 10:30:00",
     avatar:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
   },
@@ -319,7 +319,7 @@ const mockVisitors = [
     company: "Innovate Co",
     jobTitle: "Product Manager",
     phone: "+1-555-0321",
-    imported: "2025-01-15T10:30:00Z",
+    imported: "15/01/2025 10:30:00",
     avatar:
       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
   },
@@ -331,7 +331,7 @@ const mockVisitors = [
     company: "FutureTech Networks",
     jobTitle: "Lead Developer",
     phone: "+1-555-0654",
-    imported: "2025-01-15T10:30:00Z",
+    imported: "15/01/2025 10:30:00",
     avatar: null,
   },
   {
@@ -342,7 +342,7 @@ const mockVisitors = [
     company: "SmartSys Ltd",
     jobTitle: "Operations Manager",
     phone: "+1-555-0987",
-    imported: "2025-01-15T10:30:00Z",
+    imported: "15/01/2025 10:30:00",
     avatar: null,
   },
 ];
@@ -399,6 +399,7 @@ export function EventAdminDashboard({
     setIsVisitorImportDialogOpen,
   ] = useState(false);
   const [importMode, setImportMode] = useState("add");
+  const [selectedVisitorFile, setSelectedVisitorFile] = useState<File | null>(null);
   const [companySortBy, setCompanySortBy] =
     useState("leadsCapured");
   const [companySortOrder, setCompanySortOrder] =
@@ -743,11 +744,35 @@ export function EventAdminDashboard({
 
   const handleVisitorImport = () => {
     setIsVisitorImportDialogOpen(true);
+    setSelectedVisitorFile(null);
+  };
+
+  const handleVisitorFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedVisitorFile(file);
+    }
+  };
+
+  const handleDownloadVisitorTemplate = () => {
+    const template = "First Name,Last Name,Email,Phone,Company,Job Title\nJohn,Doe,john@example.com,+1234567890,Example Corp,Manager";
+    const blob = new Blob([template], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'visitor_import_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   const handleImportSubmit = () => {
-    console.log(`Importing visitors with mode: ${importMode}`);
-    setIsVisitorImportDialogOpen(false);
+    if (selectedVisitorFile) {
+      console.log(`Importing visitors from file: ${selectedVisitorFile.name} with mode: ${importMode}`);
+      setIsVisitorImportDialogOpen(false);
+      setSelectedVisitorFile(null);
+    }
   };
 
   // Export to Excel function
@@ -1004,6 +1029,16 @@ export function EventAdminDashboard({
                   </h2>
                 </div>
               </div>
+              <Button
+                variant="blue"
+                onClick={handleExportToExcel}
+                style={{ backgroundColor: '#2563eb', color: 'white', borderColor: '#2563eb' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = '#2563eb'}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Event Leads
+              </Button>
             </div>
 
             {/* Event Performance Metrics */}
@@ -1541,15 +1576,90 @@ export function EventAdminDashboard({
           open={isVisitorImportDialogOpen}
           onOpenChange={setIsVisitorImportDialogOpen}
         >
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Import Visitors</DialogTitle>
               <DialogDescription>
-                Upload a CSV file to import visitor data for
-                this event.
+                Download and use the template to import your visitor data
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+
+            <div className="space-y-6">
+              {/* Template Download Section */}
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <h4 className="font-medium text-blue-900">Step 1: Download Template</h4>
+                    <p className="text-sm text-blue-700">
+                      Download the CSV template with the required column headers
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadVisitorTemplate}
+                    className="shrink-0"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Template
+                  </Button>
+                </div>
+              </div>
+
+              {/* File Upload Section */}
+              <div className="space-y-3">
+                <h4 className="font-medium">Step 2: Upload Your File</h4>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                  <Upload className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                  <input
+                    type="file"
+                    id="visitor-file-upload"
+                    accept=".csv,.xlsx,.xls"
+                    onChange={handleVisitorFileSelect}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="visitor-file-upload"
+                    className="cursor-pointer"
+                  >
+                    <div className="space-y-2">
+                      {selectedVisitorFile ? (
+                        <>
+                          <p className="text-sm font-medium text-green-600">
+                            ✓ {selectedVisitorFile.name}
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                              e.preventDefault();
+                              setSelectedVisitorFile(null);
+                            }}
+                          >
+                            Choose Different File
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-medium text-gray-700">
+                            Click to choose a file or drag and drop
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Supports CSV, XLSX, XLS files
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </label>
+                </div>
+                {selectedVisitorFile && (
+                  <p className="text-sm text-muted-foreground">
+                    Ready to import {selectedVisitorFile.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Import Mode Section */}
               <div className="space-y-3">
                 <Label>Import Mode</Label>
                 <RadioGroup
@@ -1573,27 +1683,26 @@ export function EventAdminDashboard({
                   </div>
                 </RadioGroup>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="csv-file">CSV File</Label>
-                <Input
-                  id="csv-file"
-                  type="file"
-                  accept=".csv"
-                />
+
+              {/* Actions */}
+              <div className="flex items-center justify-between pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsVisitorImportDialogOpen(false);
+                    setSelectedVisitorFile(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleImportSubmit}
+                  disabled={!selectedVisitorFile}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import Visitors
+                </Button>
               </div>
-            </div>
-            <div className="flex justify-end space-x-2 mt-6">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setIsVisitorImportDialogOpen(false)
-                }
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleImportSubmit}>
-                Import Visitors
-              </Button>
             </div>
           </DialogContent>
         </Dialog>
