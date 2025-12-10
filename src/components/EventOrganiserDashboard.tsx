@@ -9,6 +9,7 @@ import { ImageViewer } from "./ImageViewer";
 import {
   Users,
   Building2,
+  Calendar,
   TrendingUp,
   Target,
   Award,
@@ -21,10 +22,13 @@ import {
   Upload,
   UserPlus,
   Maximize2,
+  Delete,
   X,
   ChevronDown,
   ChevronUp,
   Search,
+  AlertTriangle,
+  CheckCircle,
 } from "lucide-react";
 import { mockAllLeads } from "./constants/mockData";
 import { Button } from "./ui/button";
@@ -132,10 +136,11 @@ const mockOrganiserEvents = [
   {
     id: 1,
     name: "Tech Conference 2025",
-    dateLabel: "22/01/2025",
+    dateLabel: "22nd-24th Jan 2025",
     dates: "Jan 22-24, 2025",
     location: "London, UK",
     leadsCaptured: 480,
+    visitorCount: 1250,
     avgSalesIntelScore: 7.8,
     avgConversionScore: 7.1,
     activeUsers: 89,
@@ -144,10 +149,11 @@ const mockOrganiserEvents = [
   {
     id: 2,
     name: "AI Summit 2025",
-    dateLabel: "12/02/2025",
+    dateLabel: "12th-13th Feb 2025",
     dates: "Feb 12-13, 2025",
     location: "Berlin, DE",
     leadsCaptured: 320,
+    visitorCount: 890,
     avgSalesIntelScore: 7.4,
     avgConversionScore: 6.9,
     activeUsers: 64,
@@ -156,10 +162,11 @@ const mockOrganiserEvents = [
   {
     id: 3,
     name: "Digital Transform Conference",
-    dateLabel: "05/03/2025",
+    dateLabel: "5th-6th Mar 2025",
     dates: "Mar 5-6, 2025",
     location: "New York, USA",
     leadsCaptured: 260,
+    visitorCount: 720,
     avgSalesIntelScore: 7.1,
     avgConversionScore: 6.6,
     activeUsers: 58,
@@ -168,10 +175,11 @@ const mockOrganiserEvents = [
   {
     id: 4,
     name: "Startup Showcase 2025",
-    dateLabel: "18/04/2025",
+    dateLabel: "18th Apr 2025",
     dates: "Apr 18, 2025",
     location: "Dublin, IE",
     leadsCaptured: 140,
+    visitorCount: 450,
     avgSalesIntelScore: 6.6,
     avgConversionScore: 6.1,
     activeUsers: 32,
@@ -180,10 +188,11 @@ const mockOrganiserEvents = [
   {
     id: 5,
     name: "Cloud Computing Expo",
-    dateLabel: "09/05/2025",
+    dateLabel: "9th-10th May 2025",
     dates: "May 9-10, 2025",
     location: "San Francisco, USA",
     leadsCaptured: 195,
+    visitorCount: 580,
     avgSalesIntelScore: 7.0,
     avgConversionScore: 6.4,
     activeUsers: 41,
@@ -358,6 +367,9 @@ const mockCompanies = [
   },
 ];
 
+// Helper function to get random event ID (1-5)
+const getRandomEventId = () => Math.floor(Math.random() * 5) + 1;
+
 // Mock visitors data
 const mockVisitors = [
   {
@@ -371,6 +383,7 @@ const mockVisitors = [
     imported: "2025-01-15T10:30:00Z",
     avatar:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    eventId: getRandomEventId(),
   },
   {
     id: 2,
@@ -383,6 +396,7 @@ const mockVisitors = [
     imported: "2025-01-15T10:30:00Z",
     avatar:
       "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+    eventId: getRandomEventId(),
   },
   {
     id: 3,
@@ -395,6 +409,7 @@ const mockVisitors = [
     imported: "2025-01-15T10:30:00Z",
     avatar:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    eventId: getRandomEventId(),
   },
   {
     id: 4,
@@ -407,6 +422,7 @@ const mockVisitors = [
     imported: "2025-01-15T10:30:00Z",
     avatar:
       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
+    eventId: getRandomEventId(),
   },
   {
     id: 5,
@@ -418,6 +434,7 @@ const mockVisitors = [
     phone: "+1-555-0654",
     imported: "2025-01-15T10:30:00Z",
     avatar: null,
+    eventId: getRandomEventId(),
   },
   {
     id: 6,
@@ -429,6 +446,7 @@ const mockVisitors = [
     phone: "+1-555-0987",
     imported: "2025-01-15T10:30:00Z",
     avatar: null,
+    eventId: getRandomEventId(),
   },
 ];
 
@@ -493,6 +511,12 @@ export function EventOrganiserDashboard({
   const [eventsSortBy, setEventsSortBy] = useState("leadsCaptured");
   const [eventsSortOrder, setEventsSortOrder] = useState("desc");
   const [activeTab, setActiveTab] = useState("events");
+  const [organiserUsers, setOrganiserUsers] = useState([
+    { id: 1, firstName: "Steven", lastName: "Smith", email: "steven@conferencebadges.com" },
+    { id: 2, firstName: "Cary", lastName: "Jones", email: "cary@conferencebadges.com" },
+  ]);
+  const [isAddOrganiserDialogOpen, setIsAddOrganiserDialogOpen] = useState(false);
+  const [newOrganiser, setNewOrganiser] = useState({ firstName: "", lastName: "", email: "", sendInvite: true });
   const [isNormalized, setIsNormalized] = useState(false);
   const [isBubbleChartExpanded, setIsBubbleChartExpanded] =
     useState(false);
@@ -566,6 +590,9 @@ export function EventOrganiserDashboard({
   // Search states
   const [leadsSearchQuery, setLeadsSearchQuery] = useState("");
 
+  // Calendar state
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+
   const itemsPerPage = 5;
 
   // Get event-specific leads based on selectedEvent
@@ -590,6 +617,12 @@ export function EventOrganiserDashboard({
   };
 
   const eventLeads = getEventLeads();
+
+  // Get visitor count for a specific event
+  const getVisitorCountForEvent = (eventId: number) => {
+    const event = mockOrganiserEvents.find((e) => e.id === eventId);
+    return event?.visitorCount || 0;
+  };
 
   const handleCompanySort = (column) => {
     if (companySortBy === column) {
@@ -1141,6 +1174,134 @@ export function EventOrganiserDashboard({
     setIsAddEventDialogOpen(false);
   };
 
+  // Calendar helper functions
+  const getMonthName = (monthIndex) => {
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    return months[monthIndex];
+  };
+
+  const navigateMonth = (direction) => {
+    setCurrentMonth(prev => {
+      const newMonth = prev + direction;
+      // Allow navigation between January (0) and December (11)
+      if (newMonth < 0) return 11;
+      if (newMonth > 11) return 0;
+      return newMonth;
+    });
+  };
+
+  // Mock events data with dates for calendar
+  const calendarEvents = [
+    {
+      id: 1,
+      name: "Tech Conference 2025",
+      date: "January 22-24, 2025",
+      location: "London, UK",
+      exhibitorCount: 45,
+      visitorCount: 1250,
+      startDate: new Date(2025, 0, 22), // Jan 22
+      endDate: new Date(2025, 0, 24),
+      color: "blue"
+    },
+    {
+      id: 2,
+      name: "AI Summit 2025",
+      date: "February 12-13, 2025",
+      location: "Berlin, DE",
+      exhibitorCount: 32,
+      visitorCount: 890,
+      startDate: new Date(2025, 1, 12), // Feb 12
+      endDate: new Date(2025, 1, 13),
+      color: "green"
+    },
+    {
+      id: 3,
+      name: "Digital Transform Conference",
+      date: "March 5-6, 2025",
+      location: "New York, USA",
+      exhibitorCount: 28,
+      visitorCount: 720,
+      startDate: new Date(2025, 2, 5), // Mar 5
+      endDate: new Date(2025, 2, 6),
+      color: "purple"
+    },
+    {
+      id: 4,
+      name: "Startup Showcase 2025",
+      date: "April 18, 2025",
+      location: "Dublin, IE",
+      exhibitorCount: 24,
+      visitorCount: 450,
+      startDate: new Date(2025, 3, 18), // Apr 18
+      endDate: new Date(2025, 3, 18),
+      color: "blue"
+    },
+    {
+      id: 5,
+      name: "Cloud Computing Expo",
+      date: "May 9-10, 2025",
+      location: "San Francisco, USA",
+      exhibitorCount: 30,
+      visitorCount: 580,
+      startDate: new Date(2025, 4, 9), // May 9
+      endDate: new Date(2025, 4, 10),
+      color: "green"
+    }
+  ];
+
+  // Get events for a specific date
+  const getEventsForDate = (year, month, day) => {
+    const checkDate = new Date(year, month, day);
+    // Set to start of day for proper comparison
+    checkDate.setHours(0, 0, 0, 0);
+    
+    return calendarEvents.filter(event => {
+      const start = new Date(event.startDate);
+      const end = new Date(event.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+      
+      return checkDate >= start && checkDate <= end;
+    });
+  };
+
+  // Generate calendar days for current month
+  const generateCalendarDays = () => {
+    const year = 2025;
+    const month = currentMonth;
+    let firstDay = new Date(year, month, 1).getDay();
+    // Convert Sunday (0) to 6, and shift Monday (1) to 0
+    firstDay = firstDay === 0 ? 6 : firstDay - 1;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const days = [];
+    
+    // Empty cells before month starts
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+    
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const events = getEventsForDate(year, month, day);
+      days.push({ day, events });
+    }
+    
+    return days;
+  };
+
+  // Handle event click from calendar
+  const handleEventClick = (event) => {
+    // Navigate to the event admin dashboard
+    const matchingEvent = mockOrganiserEvents.find(e => e.name === event.name);
+    if (matchingEvent) {
+      onNavigate?.("event-admin-dashboard", { 
+        event: { id: matchingEvent.id, name: matchingEvent.name }, 
+        organiser: selectedEventOrganiser 
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       <DeveloperLabel
@@ -1179,8 +1340,9 @@ export function EventOrganiserDashboard({
       <main className="container mx-auto px-6 py-8 space-y-8 pt-28">
         <TooltipProvider>
           {/* Hero Section */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
+          <div className="space-y-6 pt-4">
+            {/* Event Organiser Name and Metrics in One Line */}
+            <div className="flex items-center justify-between gap-8">
               <div className="flex items-center space-x-4">
                 {selectedEventOrganiser?.image && (
                   <ImageWithFallback
@@ -1190,538 +1352,574 @@ export function EventOrganiserDashboard({
                   />
                 )}
                 <div>
-                  {/* <h2 className="text-muted-foreground text-xl">
-                    Event Organiser Dashboard
-                  </h2> */}
-                  <h1 className="text-4xl">
+                  <h1 className="text-3xl font-bold whitespace-nowrap">
                     {selectedEventOrganiser
                       ? `${selectedEventOrganiser.name}`
                       : "{EventOrganiserName}"}
                   </h1>
                 </div>
               </div>
-            </div>
 
-            {/* Event Performance Metrics */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <TotalLeadsBubble
-                totalLeads={eventLeads.length}
-                dataStep="2"
-                subtitle={`${mockEventMetrics.totalCompanies} exhibiting companies`}
-                helpText="Total number of leads captured across all exhibiting companies at this event"
-                onClick={() => {
-                  setActiveTab("events");
-                  setTimeout(() => {
-                    leadsTabRef.current?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
-                    });
-                    // After scrolling to tab, scroll to the bottom to show the leads list
+              {/* Performance Metrics Cards - SuperAdmin styling
+              <div className="flex gap-6 sm:gap-3 lg:gap-4 flex-1 justify-evenly">
+                <Card className="bg-emerald-50 border-emerald-200 border flex-1 min-w-0"
+                  onClick={() => {
+                    setActiveTab("events");
                     setTimeout(() => {
-                      window.scrollTo({
-                        top: document.body.scrollHeight,
+                      leadsTabRef.current?.scrollIntoView({
                         behavior: "smooth",
+                        block: "start",
                       });
-                    }, 500);
-                  }, 100);
-                }}
-              />
+                      setTimeout(() => {
+                        window.scrollTo({
+                          top: document.body.scrollHeight,
+                          behavior: "smooth",
+                        });
+                      }, 500);
+                    }, 100);
+                  }}
+                  style={{ cursor: "pointer" }}
+                >
+                  <CardContent className="flex items-center gap-3 sm:gap-3 p-2 sm:p-2">
+                    <Users className="h-16 w-16 sm:h-14 sm:w-14 lg:h-16 lg:w-16 text-emerald-600 flex-shrink-0" />
+                    <div className="flex flex-col min-w-0 flex-1 text-center">
+                      <div className="text-base sm:text-lg lg:text-xl font-semibold text-muted-foreground whitespace-nowrap">Total Leads</div>
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-emerald-600 leading-tight">
+                        <AnimatedCounter value={eventLeads.length} duration={1500} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              <LicenseUsageBubble
-                activeUsers={
-                  mockEventMetrics.totalLicensesActive
-                }
-                totalUsers={
-                  mockEventMetrics.totalLicensesAssigned
-                }
-                dataStep="3"
-                subtitle="Across all companies"
-                helpText="Total active users vs assigned licenses for the entire event"
-              />
+                <Card className="bg-orange-50 border-orange-200 border flex-1 min-w-0">
+                  <CardContent className="flex items-center gap-3 sm:gap-3 p-2 sm:p-2">
+                    <Award className="h-16 w-16 sm:h-14 sm:w-14 lg:h-16 lg:w-16 text-orange-600 flex-shrink-0" />
+                    <div className="flex flex-col min-w-0 flex-1 text-center">
+                      <div className="text-base sm:text-lg lg:text-xl font-semibold text-muted-foreground whitespace-nowrap">Licenses</div>
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-orange-600 leading-tight">
+                        {mockEventMetrics.totalLicensesActive}/{mockEventMetrics.totalLicensesAssigned}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              <SalesIntelScoreBubble
-                score={mockEventMetrics.avgSalesIntelScore}
-                subtitle="Event-wide average"
-                helpText="AI-generated score (1-10) rating overall lead qualification quality across all companies at this event"
-              />
+                <Card className="bg-blue-50 border-blue-200 border flex-1 min-w-0">
+                  <CardContent className="flex items-center gap-3 sm:gap-3 p-2 sm:p-2">
+                    <TrendingUp className="h-16 w-16 sm:h-14 sm:w-14 lg:h-16 lg:w-16 text-blue-600 flex-shrink-0" />
+                    <div className="flex flex-col min-w-0 flex-1 text-center">
+                      <div className="text-base sm:text-lg lg:text-xl font-semibold text-muted-foreground whitespace-nowrap">Sales Intel</div>
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 leading-tight">
+                        {mockEventMetrics.avgSalesIntelScore.toFixed(1)}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              <ConversionScoreBubble
-                score={mockEventMetrics.avgConversionScore}
-                subtitle="Event-wide average"
-                helpText="AI-generated average score (1-10) rating prospect interest level across all companies"
-              />
+                <Card className="bg-purple-50 border-purple-200 border flex-1 min-w-0">
+                  <CardContent className="flex items-center gap-3 sm:gap-3 p-2 sm:p-2">
+                    <Target className="h-16 w-16 sm:h-14 sm:w-14 lg:h-16 lg:w-16 text-purple-600 flex-shrink-0" />
+                    <div className="flex flex-col min-w-0 flex-1 text-center">
+                      <div className="text-base sm:text-lg lg:text-xl font-semibold text-muted-foreground whitespace-nowrap">Conversion</div>
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600 leading-tight">
+                        {mockEventMetrics.avgConversionScore.toFixed(1)}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div> */}
             </div>
 
-            {/* Event Analytics Charts */}
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div className="flex items-center gap-2">
-                      <CardTitle>Leads this Year</CardTitle>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+          </div>
+
+          {/* Event Management and Calendar Side by Side */}
+          <div className="flex gap-6" ref={leadsTabRef}>
+            {/* Left Column - Events Management (70% width) */}
+            <div style={{ flex: "0 0 70%", minWidth: 0 }}>
+                <Card className="h-full">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>Events</CardTitle>
+                        <CardDescription>
+                          {/* View all events organised by this organiser */}
+                        </CardDescription>
+                      </div>
+                      <Button onClick={() => setIsAddEventDialogOpen(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add New Event
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                  <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="events">
+                        Events - <span className="font-bold">{mockOrganiserEvents.length}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="organiser-users">
+                        Organiser Users - <span className="font-bold">{organiserUsers.length}</span>
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="events" className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>
+                                  <button type="button" className="flex items-center gap-1 font-semibold" onClick={() => handleEventSort("name")}>Event<span className="text-xs text-muted-foreground">{getSortIcon("name", eventsSortBy, eventsSortOrder)}</span></button>
+                                </TableHead>
+                                <TableHead>
+                                  <button type="button" className="flex items-center gap-1 font-semibold" onClick={() => handleEventSort("dateLabel")}>Date<span className="text-xs text-muted-foreground">{getSortIcon("dateLabel", eventsSortBy, eventsSortOrder)}</span></button>
+                                </TableHead>
+                                <TableHead>
+                                  <button type="button" className="flex items-center gap-1 font-semibold" onClick={() => handleEventSort("visitorCount")}>Visitors<span className="text-xs text-muted-foreground">{getSortIcon("visitorCount", eventsSortBy, eventsSortOrder)}</span></button>
+                                </TableHead>
+                                <TableHead className="text-right">
+                                  <button type="button" className="flex items-center gap-1 ml-auto font-semibold" onClick={() => handleEventSort("leadsCaptured")}>Leads<span className="text-xs text-muted-foreground">{getSortIcon("leadsCaptured", eventsSortBy, eventsSortOrder)}</span></button>
+                                </TableHead>
+                                <TableHead className="text-right font-semibold">Action</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {sortedEvents.map((event) => (
+                                <TableRow key={event.id} className="cursor-pointer hover:bg-muted/50" onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); onNavigate?.("event-admin-dashboard", { event: { id: event.id, name: event.name }, organiser: selectedEventOrganiser }); }}>
+                                  <TableCell className="font-medium">{event.name}</TableCell>
+                                  <TableCell>{event.dateLabel}</TableCell>
+                                  <TableCell>{getVisitorCountForEvent(event.id)}</TableCell>
+                                  <TableCell className="text-right"><span className="text-blue-600 font-semibold">{event.leadsCaptured}</span></TableCell>
+                                  <TableCell className="text-right"><Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); console.log("Edit event", event.name); }}><Edit className="h-4 w-4" /></Button></TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="organiser-users" className="space-y-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                        </div>
+                        <Button onClick={() => setIsAddOrganiserDialogOpen(true)} >
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Add Organiser
+                        </Button>
+                        
+                      </div>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-1/6">User</TableHead>
+                              <TableHead className="w-1/4">Email</TableHead>
+                              <TableHead className="w-1/6">Role</TableHead>
+                              <TableHead className="w-1/6 text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {organiserUsers.map((user) => (
+                              <TableRow key={user.id} className="hover:bg-muted/50">
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                      {user.avatar ? (
+                                        <AvatarImage src={user.avatar} alt={user.firstName} />
+                                      ) : (
+                                        <AvatarFallback>{user.firstName[0]}{user.lastName[0]}</AvatarFallback>
+                                      )}
+                                    </Avatar>
+                                    <div>
+                                      <div className="font-medium">{user.firstName} {user.lastName}</div>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                <TableCell>
+                                  <span className="px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs font-semibold">Event Organiser</span>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button variant="ghost" size="icon" onClick={() => setIsAddOrganiserDialogOpen(true)}><Edit className="h-4 w-4" /></Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+              </CardContent>
+            </Card>
+            </div>
+
+            {/* Right Column - Calendar (30% width) */}
+            <div style={{ flex: "0 0 30%", minWidth: 0 }}>
+            <Card className="h-full">
+              <CardHeader className="space-y-1 pb-1">
+                <div className="flex flex-row items-center justify-between space-y-0">
+                  <CardTitle className="font-bold">Event Calendar</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <Button variant="ghost" size="sm" onClick={() => navigateMonth(-1)} className="h-6 w-6 p-0 flex-shrink-0">
+                    <span className="text-lg">‹</span>
+                  </Button>
+                  <div className="text-sm font-medium w-[140px] text-center">{getMonthName(currentMonth)} 2025</div>
+                  <Button variant="ghost" size="sm" onClick={() => navigateMonth(1)} className="h-6 w-6 p-0 flex-shrink-0">
+                    <span className="text-lg">›</span>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-3">
+                {/* Calendar Header - Days of Week */}
+                <div className="grid grid-cols-7 gap-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+                  <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">M</div>
+                  <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">T</div>
+                  <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">W</div>
+                  <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">T</div>
+                  <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">F</div>
+                  <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">S</div>
+                  <div className="text-center text-[10px] font-semibold text-muted-foreground py-1">S</div>
+                </div>
+
+                {/* Calendar Grid - Fixed aspect ratio grid */}
+                <div className="grid grid-cols-7 gap-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+                  {generateCalendarDays().map((dayData, index) => {
+                    if (!dayData) {
+                      return <div key={`empty-${index}`} className="aspect-square"></div>;
+                    }
+
+                    const { day, events } = dayData;
+                    const today = new Date();
+                    const isToday = day === today.getDate() && currentMonth === today.getMonth();
+                    
+                    if (events.length === 0) {
+                      return (
+                        <div 
+                          key={day} 
+                          className={`aspect-square flex items-center justify-center text-[10px] border rounded transition-colors ${
+                            isToday ? 'bg-primary text-primary-foreground font-bold border-primary' : 'hover:bg-muted/50'
+                          }`}
+                        >
+                          {day}
+                        </div>
+                      );
+                    }
+
+                    // Define color map once for reuse
+                    const colorMap = {
+                      blue: { border: "border-blue-500", bg: "bg-blue-100", hover: "hover:bg-blue-200", text: "text-blue-600" },
+                      green: { border: "border-green-500", bg: "bg-green-100", hover: "hover:bg-green-200", text: "text-green-600" },
+                      purple: { border: "border-purple-500", bg: "bg-purple-100", hover: "hover:bg-purple-200", text: "text-purple-600" }
+                    };
+
+                    if (events.length === 1) {
+                      const event = events[0];
+                      const colors = colorMap[event.color as keyof typeof colorMap] || colorMap.blue;
+
+                      return (
+                        <Tooltip key={day}>
+                          <TooltipTrigger asChild>
+                            <div 
+                              className={`aspect-square flex items-center justify-center text-[10px] border ${colors.border} ${colors.bg} rounded font-semibold cursor-pointer ${colors.hover} transition-colors ${
+                                isToday ? 'ring-1 ring-primary ring-offset-1' : ''
+                              }`}
+                              onClick={() => handleEventClick(event)}
+                            >
+                              {day}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="p-3 text-sm leading-snug max-w-xs cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleEventClick(event)}>
+                            <div className="space-y-1.5">
+                              <p className="font-semibold text-base">{event.name}</p>
+                              <p className="text-sm">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    }
+
+                    // Multiple events (2 or more) - show split color view with clickable list tooltip
+                    return (
+                      <Tooltip key={day}>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className={`aspect-square text-[10px] relative rounded overflow-hidden border cursor-pointer ${
+                              isToday ? 'ring-1 ring-primary ring-offset-1 border-primary' : 'border-gray-300'
+                            }`}
+                          >
+                            <div className="absolute inset-0 flex">
+                              {events.map((event, idx) => {
+                                const colors = colorMap[event.color as keyof typeof colorMap] || colorMap.blue;
+                                const isFirst = idx === 0;
+                                
+                                return (
+                                  <div 
+                                    key={event.id}
+                                    className={`flex-1 ${colors.bg} flex items-center justify-center relative group ${
+                                      isFirst ? '' : 'border-l'
+                                    } ${colors.border} hover:opacity-80 transition-opacity`}
+                                  />
+                                );
+                              })}
+                            </div>
+                            <span className="absolute inset-0 flex items-center justify-center z-10 font-semibold pointer-events-none">{day}</span>
+                          </div>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
-                            Lead capture activity throughout 2025
-                          </p>
+                        <TooltipContent className="p-3 text-sm leading-snug max-w-xs w-auto">
+                          <div className="space-y-2">
+                            {events.map((event) => {
+                              const colors = colorMap[event.color as keyof typeof colorMap] || colorMap.blue;
+                              return (
+                                <div 
+                                  key={event.id}
+                                  className={`p-2 rounded cursor-pointer hover:bg-muted/70 transition-colors ${colors.bg} ${colors.text}`}
+                                  onClick={() => handleEventClick(event)}
+                                >
+                                  <p className="font-semibold text-sm">{event.name}</p>
+                                  <p className="text-xs mt-1">{event.exhibitorCount} exhibitors • {event.visitorCount.toLocaleString()} visitors</p>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </TooltipContent>
                       </Tooltip>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div
-                    className="h-64"
-                    style={{ outline: "none" }}
-                  >
-                    <ResponsiveContainer
-                      width="100%"
-                      height="100%"
-                      style={{ outline: "none" }}
-                    >
-                      <LineChart
-                        data={mockYearlyLeadsData}
-                        margin={{
-                          top: 5,
-                          right: 5,
-                          left: 10,
-                          bottom: 4,
-                        }}
-                        style={{
-                          outline: "none",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {/* defs for gradient stroke + glow */}
-                        <defs>
-                          <linearGradient
-                            id="lineGradientYearly"
-                            x1="0"
-                            y1="0"
-                            x2="0"
-                            y2="1"
-                          >
-                            <stop
-                              offset="0%"
-                              stopColor="#1D4ED8"
-                              stopOpacity={0.9}
-                            />
-                            <stop
-                              offset="100%"
-                              stopColor="#3B82F6"
-                              stopOpacity={0.6}
-                            />
-                          </linearGradient>
-                          <filter
-                            id="glowYearly"
-                            x="-50%"
-                            y="-50%"
-                            width="200%"
-                            height="200%"
-                          >
-                            <feGaussianBlur
-                              stdDeviation="2.5"
-                              result="coloredBlur"
-                            />
-                            <feMerge>
-                              <feMergeNode in="coloredBlur" />
-                              <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                          </filter>
-                        </defs>
-
-                        {/* modern subtle grid */}
-                        <CartesianGrid
-                          strokeDasharray="4 6"
-                          strokeOpacity={0.25}
-                          vertical={false}
-                        />
-
-                        {/* axes */}
-                        <XAxis
-                          dataKey="month"
-                          tickMargin={8}
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{
-                            fill: "#6B7280",
-                            fontSize: 12,
-                          }}
-                        />
-                        <YAxis
-                          width={28}
-                          allowDecimals={false}
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{
-                            fill: "#6B7280",
-                            fontSize: 12,
-                          }}
-                          tickMargin={6}
-                        />
-
-                        {/* tooltip */}
-                        <RechartsTooltip
-                          cursor={{
-                            stroke:
-                              "rgba(29, 78, 216, 0.4)",
-                            strokeWidth: 2,
-                          }}
-                          contentStyle={{
-                            borderRadius: 8,
-                            border: "1px solid #E5E7EB",
-                            boxShadow:
-                              "0 8px 24px rgba(0,0,0,0.08)",
-                          }}
-                          labelStyle={{
-                            fontWeight: 600,
-                          }}
-                          formatter={(v) => [
-                            `${v} leads`,
-                            "Leads",
-                          ]}
-                        />
-
-                        {/* line */}
-                        <Line
-                          type="monotone"
-                          dataKey="leads"
-                          stroke="#1D4ED8"
-                          strokeWidth={3}
-                          dot={false}
-                          animationBegin={200}
-                          animationDuration={800}
-                          animationEasing="ease-out"
-                          style={{ cursor: "pointer" }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <LeadQualityBarChart
-                data={mockWarmthData}
-                onSegmentClick={filterLeadsByWarmth}
-              />
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
             </div>
           </div>
 
-          {/* Company Performance Section - Hidden by default */}
-          <Collapsible
-            open={showCompanyPerformance}
-            onOpenChange={setShowCompanyPerformance}
-          >
-
-            <CollapsibleContent>
-              <Card>
-                <CardContent className="p-6">
-                  <div className="grid gap-6 md:grid-cols-2 items-stretch">
-                    {/* Bubble Chart */}
-                    <div>
-                      <Card className="h-full">
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <CardTitle>
-                                Company Performance
-                              </CardTitle>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <div className="flex items-center space-x-2 m-[0px] px-[10px] py-[0px]">
-                                <Label
-                                  htmlFor="normalize-toggle"
-                                  className="text-sm"
-                                >
-                                  Normalize
-                                </Label>
-                                <Switch
-                                  id="normalize-toggle"
-                                  checked={isNormalized}
-                                  onCheckedChange={
-                                    setIsNormalized
-                                  }
-                                />
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  setIsBubbleChartExpanded(true)
-                                }
-                                className="flex items-center space-x-1"
-                              >
-                                <Maximize2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="relative" style={{ height: 290 }}>
-                            <ResponsiveContainer
-                              width="100%"
-                              height="100%"
-                            >
-                              <ScatterChart>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                  dataKey="x"
-                                  type="number"
-                                  name="Leads per User"
-                                  label={{
-                                    value: isNormalized
-                                      ? "Leads per Active User"
-                                      : "Total Leads",
-                                    position: "insideBottom",
-                                    offset: -5,
-                                  }}
-                                />
-                                <YAxis
-                                  dataKey="y"
-                                  type="number"
-                                  name="Sales Intel Score"
-                                  label={{
-                                    value:
-                                      "Avg Sales Intel Score",
-                                    angle: -90,
-                                    position: "insideLeft",
-                                    textAnchor: "middle",
-                                    offset: 15,
-                                    dy: 75,
-                                  }}
-                                />
-                                {/* Quadrant lines */}
-                                <ReferenceLine
-                                  x={isNormalized ? 15 : 40}
-                                  stroke="#e5e7eb"
-                                  strokeDasharray="5 5"
-                                />
-                                <ReferenceLine
-                                  y={70}
-                                  stroke="#e5e7eb"
-                                  strokeDasharray="5 5"
-                                />
-                                <RechartsTooltip
-                                  content={<CustomTooltip />}
-                                />
-                                <Scatter
-                                  data={bubbleChartData}
-                                  fill="#8884d8"
-                                >
-                                  {bubbleChartData.map(
-                                    (entry, index) => (
-                                      <Cell
-                                        key={`cell-${index}`}
-                                        fill={entry.color}
-                                      />
-                                    ),
-                                  )}
-                                </Scatter>
-                              </ScatterChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Leader Cards */}
-                    <div className="h-full">
-                      <LeaderPerformanceCards
-                        companies={mockCompanies}
-                        onCompanyClick={handleCompanyCardClick}
-                        onUserClick={handleUserCardClick}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Event Management - Events only */}
-          <Card ref={leadsTabRef}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Event Management</CardTitle>
-                  <CardDescription>
-                    View all events organised by this organiser
-                  </CardDescription>
+          {/* Upcoming Events & Potential Issues & Recently Completed Events */}
+          <div className="grid gap-6 md:grid-cols-3">
+            {/* Left Column - Upcoming Events */}
+            <Card className="flex flex-col gap-3 h-[320px]">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="flex items-center space-x-2">
+                  <CardTitle className="font-bold">Upcoming Events</CardTitle>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Calendar className="h-5 w-5 text-blue-600 cursor-pointer" />
+                    </TooltipTrigger>
+                    <TooltipContent className="text-base p-3">in the next 7 days</TooltipContent>
+                  </Tooltip>
                 </div>
-                <Button onClick={() => setIsAddEventDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add New Event
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-1">
-                  <TabsTrigger value="events">
-                    Events - <span className="font-bold">{mockOrganiserEvents.length}</span>
-                  </TabsTrigger>
-                </TabsList>
+              </CardHeader>
+              <CardContent className="flex-1 overflow-y-auto px-6 pb-6 space-y-4" style={{ scrollbarWidth: 'thin' }}>
+                {sortedEvents.slice(0, 3).map((event, idx) => {
+                  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                  const eventDate = new Date(2025, 0, 22 + idx * 2);
+                  const dayLabel = dayLabels[eventDate.getDay()];
+                  const dateNum = eventDate.getDate();
+                  
+                  return (
+                    <div 
+                      key={event.id}
+                      className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                      onClick={() => onNavigate?.("event-admin-dashboard", { event: { id: event.id, name: event.name }, organiser: selectedEventOrganiser })}
+                    >
+                      <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                        <span className="text-xs">{dayLabel}</span>
+                        <span className="font-bold">{dateNum}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium truncate">{event.name}</h4>
+                        <p className="text-sm text-muted-foreground truncate">{event.visitorCount} Visitors • {event.leadsCaptured} Leads</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
 
-                <TabsContent value="events" className="space-y-4">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>
-                            <button
-                              type="button"
-                              className="flex items-center gap-1 font-semibold"
-                              onClick={() => handleEventSort("name")}
-                            >
-                              Event
-                              <span className="text-xs text-muted-foreground">
-                                {getSortIcon("name", eventsSortBy, eventsSortOrder)}
-                              </span>
-                            </button>
-                          </TableHead>
-                          <TableHead>
-                            <button
-                              type="button"
-                              className="flex items-center gap-1 font-semibold"
-                              onClick={() => handleEventSort("dateLabel")}
-                            >
-                              Date
-                              <span className="text-xs text-muted-foreground">
-                                {getSortIcon("dateLabel", eventsSortBy, eventsSortOrder)}
-                              </span>
-                            </button>
-                          </TableHead>
-                          <TableHead>
-                            <button
-                              type="button"
-                              className="flex items-center gap-1 font-semibold"
-                              onClick={() => handleEventSort("location")}
-                            >
-                              Location
-                              <span className="text-xs text-muted-foreground">
-                                {getSortIcon("location", eventsSortBy, eventsSortOrder)}
-                              </span>
-                            </button>
-                          </TableHead>
-                          <TableHead className="text-right">
-                            <button
-                              type="button"
-                              className="flex items-center gap-1 ml-auto font-semibold"
-                              onClick={() => handleEventSort("leadsCaptured")}
-                            >
-                              Leads
-                              <span className="text-xs text-muted-foreground">
-                                {getSortIcon("leadsCaptured", eventsSortBy, eventsSortOrder)}
-                              </span>
-                            </button>
-                          </TableHead>
-                          <TableHead className="text-right">
-                            <button
-                              type="button"
-                              className="flex items-center gap-1 ml-auto font-semibold"
-                              onClick={() => handleEventSort("avgSalesIntelScore")}
-                            >
-                              Avg Sales Intel
-                              <span className="text-xs text-muted-foreground">
-                                {getSortIcon("avgSalesIntelScore", eventsSortBy, eventsSortOrder)}
-                              </span>
-                            </button>
-                          </TableHead>
-                          <TableHead className="text-right">
-                            <button
-                              type="button"
-                              className="flex items-center gap-1 ml-auto font-semibold"
-                              onClick={() => handleEventSort("avgConversionScore")}
-                            >
-                              Avg Conversion
-                              <span className="text-xs text-muted-foreground">
-                                {getSortIcon("avgConversionScore", eventsSortBy, eventsSortOrder)}
-                              </span>
-                            </button>
-                          </TableHead>
-                          <TableHead className="text-right">
-                            <button
-                              type="button"
-                              className="flex items-center gap-1 ml-auto font-semibold"
-                              onClick={() => handleEventSort("activeUsers")}
-                            >
-                              Active Users
-                              <span className="text-xs text-muted-foreground">
-                                {getSortIcon("activeUsers", eventsSortBy, eventsSortOrder)}
-                              </span>
-                            </button>
-                          </TableHead>
-                          <TableHead className="text-right font-semibold">Action</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {sortedEvents.map((event) => (
-                          <TableRow
-                            key={event.id}
-                            className="cursor-pointer hover:bg-muted/50"
-                            onClick={() => {
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                              onNavigate?.("event-admin-dashboard", {
-                                event: {
-                                  id: event.id,
-                                  name: event.name,
-                                },
-                                organiser: selectedEventOrganiser
-                              });
-                            }}
-                          >
-                            <TableCell className="font-medium">{event.name}</TableCell>
-                            <TableCell>{event.dateLabel}</TableCell>
-                            <TableCell>{event.location}</TableCell>
-                            <TableCell className="text-right">
-                              <span className="text-blue-600 font-semibold">
-                                {event.leadsCaptured}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Badge
-                                variant="outline"
-                                className={`px-2.5 py-1 rounded-full text-sm font-semibold ${getScoreBadgeColor(event.avgSalesIntelScore)}`}
-                              >
-                                {event.avgSalesIntelScore.toFixed(1)}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Badge
-                                variant="outline"
-                                className={`px-2.5 py-1 rounded-full text-sm font-semibold ${getScoreBadgeColor(event.avgConversionScore)}`}
-                              >
-                                {event.avgConversionScore.toFixed(1)}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right font-semibold">
-                              <span className="text-emerald-600">{event.activeUsers}</span>
-                              <span className="text-muted-foreground">/{event.totalUsers}</span>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  console.log("Edit event", event.name);
-                                }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+            {/* Middle Column - Potential Issues */}
+            <Card className="flex flex-col gap-3 h-[320px]">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="flex items-center space-x-2">
+                  <CardTitle className="font-bold">Potential Issues</CardTitle>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <AlertTriangle className="h-5 w-5 text-red-600 cursor-pointer" />
+                    </TooltipTrigger>
+                    <TooltipContent className="text-base p-3">in the last 7 days</TooltipContent>
+                  </Tooltip>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 overflow-y-auto px-6 pb-6 space-y-3" style={{ scrollbarWidth: 'thin' }}>
+                <div 
+                  className="flex items-center space-x-4 p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => handleEventClick(mockOrganiserEvents[0])}
+                >
+                  <div className="flex items-center justify-center w-12 h-12 bg-red-100 text-red-700 rounded flex-shrink-0">
+                    <span className="text-lg font-bold">23</span>
                   </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">Unmatched Scans</h4>
+                    <p className="text-sm text-muted-foreground truncate">{mockOrganiserEvents[0]?.name}</p>
+                  </div>
+                </div>
+
+                <div 
+                  className="flex items-center space-x-4 p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => handleEventClick(mockOrganiserEvents[0])}
+                >
+                  <div className="flex items-center justify-center w-12 h-12 bg-red-100 text-red-700 rounded flex-shrink-0">
+                    <span className="text-lg font-bold">5</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">Inactive Exhibitors</h4>
+                    <p className="text-sm text-muted-foreground truncate">{mockOrganiserEvents[0]?.name}</p>
+                  </div>
+                </div>
+
+                <div 
+                  className="flex items-center space-x-4 p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => handleEventClick(mockOrganiserEvents[1])}
+                >
+                  <div className="flex items-center justify-center w-12 h-12 bg-red-100 text-red-700 rounded flex-shrink-0">
+                    <span className="text-lg font-bold">8</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">Failed Logins</h4>
+                    <p className="text-sm text-muted-foreground truncate">{mockOrganiserEvents[1]?.name}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Right Column - Recently Completed Events */}
+            <Card className="flex flex-col gap-3 h-[320px]">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="flex items-center space-x-2">
+                  <CardTitle className="font-bold">Recently Completed Events</CardTitle>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CheckCircle className="h-5 w-5 text-green-600 cursor-pointer" />
+                    </TooltipTrigger>
+                    <TooltipContent className="text-base p-3">in the last 7 days</TooltipContent>
+                  </Tooltip>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 overflow-y-auto px-6 pb-6 space-y-4" style={{ scrollbarWidth: 'thin' }}>
+                <div 
+                  className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                  onClick={() => handleEventClick(mockOrganiserEvents[0])}
+                >
+                  <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                    <span className="text-xs">Jan</span>
+                    <span className="font-bold">22-24</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{mockOrganiserEvents[0]?.name}</h4>
+                    <p className="text-sm text-muted-foreground truncate">45 Exhibitors • 480 Leads</p>
+                  </div>
+                </div>
+
+                <div 
+                  className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                  onClick={() => handleEventClick(mockOrganiserEvents[1])}
+                >
+                  <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                    <span className="text-xs">Feb</span>
+                    <span className="font-bold">12-13</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{mockOrganiserEvents[1]?.name}</h4>
+                    <p className="text-sm text-muted-foreground truncate">32 Exhibitors • 320 Leads</p>
+                  </div>
+                </div>
+
+                <div 
+                  className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                  onClick={() => handleEventClick(mockOrganiserEvents[2])}
+                >
+                  <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                    <span className="text-xs">Mar</span>
+                    <span className="font-bold">5-6</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{mockOrganiserEvents[2]?.name}</h4>
+                    <p className="text-sm text-muted-foreground truncate">28 Exhibitors • 260 Leads</p>
+                  </div>
+                </div>
+
+                <div 
+                  className="flex items-center space-x-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                  onClick={() => handleEventClick(mockOrganiserEvents[3])}
+                >
+                  <div className="flex flex-col items-center justify-center w-12 h-12 bg-slate-700 text-white rounded flex-shrink-0">
+                    <span className="text-xs">Apr</span>
+                    <span className="font-bold">18</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{mockOrganiserEvents[3]?.name}</h4>
+                    <p className="text-sm text-muted-foreground truncate">24 Exhibitors • 140 Leads</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <Dialog open={isAddOrganiserDialogOpen} onOpenChange={setIsAddOrganiserDialogOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add Organiser</DialogTitle>
+                <DialogDescription>
+                  Assign a new organiser to this event. Optionally send them an email invitation.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="organiser-firstname">First Name</Label>
+                    <Input id="organiser-firstname" value={newOrganiser.firstName} onChange={e => setNewOrganiser(o => ({ ...o, firstName: e.target.value }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="organiser-lastname">Last Name</Label>
+                    <Input id="organiser-lastname" value={newOrganiser.lastName} onChange={e => setNewOrganiser(o => ({ ...o, lastName: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="organiser-email">Email</Label>
+                  <Input id="organiser-email" type="email" value={newOrganiser.email} onChange={e => setNewOrganiser(o => ({ ...o, email: e.target.value }))} />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="send-invite-toggle" checked={newOrganiser.sendInvite} onCheckedChange={checked => setNewOrganiser(o => ({ ...o, sendInvite: checked }))} />
+                  <Label htmlFor="send-invite-toggle">Send email invitation</Label>
+                </div>
+                <div className="flex justify-end space-x-2 mt-6">
+                  <Button variant="outline" onClick={() => setIsAddOrganiserDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (!newOrganiser.firstName.trim() || !newOrganiser.lastName.trim() || !newOrganiser.email.trim()) {
+                        alert("Please fill in all fields");
+                        return;
+                      }
+                      setOrganiserUsers(users => [
+                        ...users,
+                        {
+                          id: users.length + 1,
+                          firstName: newOrganiser.firstName,
+                          lastName: newOrganiser.lastName,
+                          email: newOrganiser.email,
+                          avatar: null,
+                        },
+                      ]);
+                      if (newOrganiser.sendInvite) {
+                        alert(`Invitation email sent to ${newOrganiser.email}`);
+                      }
+                      setIsAddOrganiserDialogOpen(false);
+                      setNewOrganiser({ firstName: "", lastName: "", email: "", sendInvite: true });
+                    }}
+                  >
+                    Add Organiser
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </TooltipProvider>
 
         {/* Company Dialog */}
@@ -1821,7 +2019,7 @@ export function EventOrganiserDashboard({
                   onCheckedChange={setSendOnboardingEmail}
                 />
                 <Label htmlFor="send-onboarding-email">
-                  Send Onboarding Emails
+                  Send Onboarding Email
                 </Label>
               </div>
             </div>
