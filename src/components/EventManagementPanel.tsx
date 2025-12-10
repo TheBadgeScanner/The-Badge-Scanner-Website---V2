@@ -1,6 +1,6 @@
 // File: components/EventManagementPanel.tsx
 import React, { useState, useMemo } from "react";
-import { User, Mail } from "lucide-react";
+import { User, Mail, Upload, Download } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -88,6 +88,43 @@ export function EventManagementPanel({
   const [isEventAdminDialogOpen, setIsEventAdminDialogOpen] = useState(false);
   const [sendWelcomeEmail, setSendWelcomeEmail] = useState(true);
   const [editingEventAdmin, setEditingEventAdmin] = useState(null);
+  const [isCompanyImportDialogOpen, setIsCompanyImportDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleCompanyImport = () => {
+    setIsCompanyImportDialogOpen(true);
+    setSelectedFile(null);
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  const handleImportCompanies = () => {
+    if (selectedFile) {
+      console.log("Importing companies from file:", selectedFile.name);
+      // Placeholder for import functionality
+      setIsCompanyImportDialogOpen(false);
+      setSelectedFile(null);
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    // Create a CSV template
+    const template = "Company Name,Contact First Name,Contact Last Name,Contact Email,Licenses Assigned,Use AI\nExample Corp,John,Doe,john@example.com,5,Yes";
+    const blob = new Blob([template], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'company_import_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
 
   const handleAddEventAdmin = () => {
     setEditingEventAdmin(null);
@@ -150,7 +187,7 @@ export function EventManagementPanel({
               currentPage={companiesCurrentPage}
               itemsPerPage={itemsPerPage}
               onPageChange={setCompaniesCurrentPage}
-              onExport={handleExportToExcel}
+              onExport={handleCompanyImport}
               onAddCompany={handleEditCompany}
               onEditCompany={handleEditCompany}
               onCompanyClick={(company) =>
@@ -238,7 +275,7 @@ export function EventManagementPanel({
             <DialogDescription>
               {editingEventAdmin
                 ? "Update event admin information and permissions"
-                : "Add a new team member to your company"}
+                : ""}
             </DialogDescription>
           </DialogHeader>
 
@@ -286,7 +323,7 @@ export function EventManagementPanel({
                   Send Welcome Email
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Send setup instructions and login details to the user
+                  Send setup and login instructions to the user
                 </p>
               </div>
               <Switch
@@ -308,6 +345,128 @@ export function EventManagementPanel({
               </Button>
               <Button onClick={handleSaveEventAdmin}>
                 {editingEventAdmin ? "Update Event Admin" : "Add & Send Email"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Company Import Dialog */}
+      <Dialog
+        open={isCompanyImportDialogOpen}
+        onOpenChange={setIsCompanyImportDialogOpen}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Import Companies</DialogTitle>
+            <DialogDescription>
+              Download the template, fill it with your company data, and upload it to import multiple companies at once
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Template Download Section */}
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <h4 className="font-medium text-blue-900">Step 1: Download Template</h4>
+                  <p className="text-sm text-blue-700">
+                    Download the CSV template with the required column headers
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadTemplate}
+                  className="shrink-0"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Template
+                </Button>
+              </div>
+            </div>
+
+            {/* File Upload Section */}
+            <div className="space-y-3">
+              <h4 className="font-medium">Step 2: Upload Your File</h4>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                <Upload className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                <input
+                  type="file"
+                  id="company-file-upload"
+                  accept=".csv,.xlsx,.xls"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="company-file-upload"
+                  className="cursor-pointer"
+                >
+                  <div className="space-y-2">
+                    {selectedFile ? (
+                      <>
+                        <p className="text-sm font-medium text-green-600">
+                          ✓ {selectedFile.name}
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                            e.preventDefault();
+                            setSelectedFile(null);
+                          }}
+                        >
+                          Choose Different File
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium text-gray-700">
+                          Click to choose a file or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Supports CSV, XLSX, XLS files
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </label>
+              </div>
+              {selectedFile && (
+                <p className="text-sm text-muted-foreground">
+                  Ready to import {selectedFile.name}
+                </p>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsCompanyImportDialogOpen(false);
+                  setSelectedFile(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleImportCompanies}
+                disabled={!selectedFile}
+                style={{ backgroundColor: '#2563eb', color: 'white', borderColor: '#2563eb' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = '#1d4ed8';
+                  }
+                }}
+                onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = '#2563eb';
+                  }
+                }}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import Companies
               </Button>
             </div>
           </div>
