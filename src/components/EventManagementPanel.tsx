@@ -30,6 +30,8 @@ import { VisitorsManagementTab } from "./ui/visitors-management-tab";
 import { LeadsManagementTab } from "./ui/leads-management-tab";
 
 export function EventManagementPanel({
+  leadsTabRef,
+  companiesTabRef,
   activeTab,
   setActiveTab,
   leadFilters,
@@ -152,17 +154,18 @@ export function EventManagementPanel({
   const eventAdminsCount = useMemo(() => eventAdmins?.length || 0, [eventAdmins]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Event Management</CardTitle>
-        <CardDescription>
-          Manage companies, visitors, and leads for this event
-          {Object.keys(leadFilters || {}).length > 0 &&
-            ` (filters applied to leads)`}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+    <div ref={leadsTabRef}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Event Management</CardTitle>
+          <CardDescription>
+            Manage companies, visitors, and leads for this event
+            {Object.keys(leadFilters || {}).length > 0 &&
+              ` (filters applied to leads)`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full inline-flex h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
             <TabsTrigger value="companies" className="whitespace-nowrap">
               Companies - <span className="font-bold">{companiesCount}</span>
@@ -197,6 +200,9 @@ export function EventManagementPanel({
                   company: company,
                 })
               }
+              filters={leadFilters}
+              onClearFilters={clearFilters}
+              onRemoveFilter={removeFilter}
             />
           </TabsContent>
 
@@ -473,6 +479,7 @@ export function EventManagementPanel({
         </DialogContent>
       </Dialog>
     </Card>
+    </div>
   );
 }
 
