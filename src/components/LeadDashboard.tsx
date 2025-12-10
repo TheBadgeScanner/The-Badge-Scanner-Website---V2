@@ -515,8 +515,11 @@ export function LeadDashboard({
                   </div>
                 )}
                 <Button
-                  variant="outline"
+                  variant="blue"
                   onClick={handleExportToExcel}
+                  style={{ backgroundColor: '#2563eb', color: 'white', borderColor: '#2563eb' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                  onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = '#2563eb'}
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Export Leads
