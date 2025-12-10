@@ -80,6 +80,9 @@ export const getFilterDisplayName = (key, value, teamUsers = []) => {
       const user = teamUsers.find(u => u.id === value);
       return `Captured By: ${user ? user.name : value}`;
     case "product": return `Product: ${value}`;
+    case "unmatchedScans": return `Unmatched Scans`;
+    case "noEmail": return `Leads without email`;
+    case "inactiveExhibitors": return `Companies with no active users`;
     default: return `${key}: ${value}`;
   }
 };
