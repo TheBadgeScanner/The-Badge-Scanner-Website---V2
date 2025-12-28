@@ -130,6 +130,35 @@ Operating Principles
 
 These principles remain from the original system but are adapted for front-end development.
 
+### Communication Discipline
+
+- Keep responses concise and task-focused. Avoid narrating routine operations ("reading file...", "inspecting component...").
+- Send updates only when starting a new major phase or discovering something that changes the plan.
+- Each update must include at least one concrete outcome ("Found X", "Confirmed Y", "Updated Z").
+- Default response length: 2–4 sentences for simple tasks, slightly longer for complex multi-step work.
+- Do not expand the task surface beyond what was requested; if new work emerges, flag it as optional.
+
+### Scope Discipline & Design System Enforcement
+
+- Explore and deeply understand existing design systems, patterns, and conventions before making changes.
+- Implement **exactly and only** what the user requests. No extra features, no added components, no UX embellishments.
+- Style all changes to align with the existing design system (CSS modules, Tailwind, SCSS, whatever is in use).
+- Do **not** invent colors, shadows, tokens, animations, or new UI elements unless explicitly requested or essential to requirements.
+- If any instruction is ambiguous, choose the simplest valid interpretation.
+- When a refactor or new pattern is beneficial, propose it separately—never bundle it with required changes.
+
+### Tool Usage & Parallelism
+
+- Prefer tools over assumptions whenever you need to verify state, inspect component trees, or read cross-file dependencies.
+- Parallelize independent reads (multiple file inspections, component searches) when planning changes to reduce iteration latency.
+- After any write operation, briefly restate what changed, where (file path or component name), and any follow-up validation performed.
+
+### Handling Ambiguity Without Asking Questions
+
+- If a request is ambiguous or underspecified, do not ask clarifying questions.
+- Instead, state your best-guess interpretation plainly, then proceed with the most likely valid approach.
+- If multiple equally valid interpretations exist, choose the one requiring the smallest change to existing code.
+
 1. Always check existing code first
 
 Before proposing any change, the agent must first:
@@ -157,6 +186,19 @@ Update relevant directives with insights
 Improve future reliability
 
 Each failure strengthens the directive library.
+
+### Pre-Finalization Verification Checklist
+
+Before marking a change complete, conduct a brief self-check:
+
+- **Imports & References**: All imports are correct; no broken or circular dependencies introduced.
+- **Cross-File Impact**: Confirmed that props, state, and context flow correctly to/from modified components.
+- **Styling Consistency**: New CSS/Tailwind classes align with existing tokens and design system; no orphaned or conflicting styles.
+- **Routing (if applicable)**: Routes are intact; no URL structure changes unless explicitly requested.
+- **Backward Compatibility**: Existing component APIs unchanged unless directives require it; no breaking changes to sibling components.
+- **Mock Data**: Confirm mock data references are consistent (if component uses mockData or constants, verify they still resolve).
+
+If any of these checks reveal issues, halt and fix before finalizing.
 
 3. Update directives with learnings
 
@@ -248,6 +290,13 @@ Whether a change affects context providers
 Whether CSS modules overlap or cascade
 
 The agent acts like someone with full mental mapping of the repo.
+
+### Ambiguity & Edge-Case Handling
+
+- If external facts may have changed (API specs, component behavior, styling conventions) and uncertainty exists, state assumptions plainly before proceeding.
+- For requests with multiple plausible interpretations, cover the most likely one thoroughly rather than defaulting to the simplest reading.
+- Never fabricate component APIs, prop shapes, or import paths when uncertain—always inspect the source first.
+- When edge cases exist (mobile vs. desktop, user roles, feature flags, mock vs. real data), ensure changes handle the happy path without breaking known edge cases.
 
 Summary
 
